@@ -19,20 +19,31 @@
                     <span class="card-side"></span>
                     <div class="flip-card__inner">
                         <div class="flip-card__front">
-                            <div class="title">Log in</div>
+                            <div class="title">Đăng nhập</div>
                             <form class="flip-card__form" action="">
                                 <input class="flip-card__input" name="email" placeholder="Email" type="email">
-                                <input class="flip-card__input" name="password" placeholder="Password" type="password">
-                                <button class="flip-card__btn">Let`s go!</button>
+                                <input class="flip-card__input" name="password" placeholder="Mật khẩu" type="password">
+                                <button class="flip-card__btn">Đăng nhập</button>
                             </form>
                         </div>
                         <div class="flip-card__back">
-                            <div class="title">Sign up</div>
+                            <div class="title">Đăng ký</div>
                             <form class="flip-card__form" action="">
-                                <input class="flip-card__input" placeholder="Name" type="name">
+                                <input class="flip-card__input" placeholder="Họ và tên" type="name">
                                 <input class="flip-card__input" name="email" placeholder="Email" type="email">
-                                <input class="flip-card__input" name="password" placeholder="Password" type="password">
-                                <button class="flip-card__btn">Confirm!</button>
+                                <input class="flip-card__input" name="password" placeholder="Mật khẩu" type="password">
+                                <input class="flip-card__input" name="password_confirmation" placeholder="Xác nhận mật khẩu"
+                                    type="password">
+                                <div style="display: flex; align-items: center; gap: 0.5em; margin: 1em 0;">
+                                    <span style="font-size: 0.95em;">Học sinh</span>
+                                    <label class="toggle-switch-role"
+                                        style="margin: 0 0.5em; position: relative; top: 2px;">
+                                        <input type="checkbox" name="role" value="teacher">
+                                        <span class="slider-role"></span>
+                                    </label>
+                                    <span style="font-size: 0.95em;">Giáo viên</span>
+                                </div>
+                                <button class="flip-card__btn">Đăng ký</button>
                             </form>
                         </div>
                     </div>
