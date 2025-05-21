@@ -145,4 +145,21 @@ class CourseController extends Controller
         
         return view('courses.my-courses', compact('courses'));
     }
+    
+    /**
+     * Display courses by category.
+     */
+    public function category($category)
+    {
+        $categoryName = str_replace('-', ' ', $category);
+        $courses = Course::where('status', 'published')
+                        ->where('category', 'like', "%{$categoryName}%")
+                        ->with('teacher')
+                        ->get();
+        
+        return view('courses.category', [
+            'courses' => $courses,
+            'category' => ucwords($categoryName)
+        ]);
+    }
 } 

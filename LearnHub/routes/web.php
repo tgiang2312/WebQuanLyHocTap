@@ -21,16 +21,20 @@ use App\Http\Controllers\CommentController;
 */
 
 Route::get('/', function () {
-    return view('homepage');
-});
+    return view('home');
+})->name('home');
 
 // Auth routes
 Route::get('/login', function () {
-    return view('login');
+    return view('auth.login');
 })->name('login');
 
+Route::get('/register', function () {
+    return view('auth.login', ['tab' => 'register']);
+})->name('register');
+
 Route::post('/login', [LoginController::class, 'login']);
-Route::post('/register', [LoginController::class, 'register'])->name('register');
+Route::post('/register', [LoginController::class, 'register']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Dashboard
@@ -47,6 +51,7 @@ Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->middlew
 Route::put('/courses/{course}', [CourseController::class, 'update'])->middleware('auth')->name('courses.update');
 Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->middleware('auth')->name('courses.destroy');
 Route::get('/my-courses', [CourseController::class, 'myCourses'])->middleware('auth')->name('courses.my');
+Route::get('/courses/category/{category}', [CourseController::class, 'category'])->name('courses.category');
 
 // Lesson routes
 Route::get('/courses/{course}/lessons/create', [LessonController::class, 'create'])->middleware('auth')->name('lessons.create');
@@ -84,3 +89,13 @@ Route::get('/submissions/{submission}/download', [SubmissionController::class, '
 Route::post('/comments', [CommentController::class, 'store'])->middleware('auth')->name('comments.store');
 Route::put('/comments/{comment}', [CommentController::class, 'update'])->middleware('auth')->name('comments.update');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->middleware('auth')->name('comments.destroy');
+
+// About page
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
+
+// Contact page
+Route::get('/contact', function () {
+    return view('contact');
+})->name('contact');
