@@ -47,4 +47,14 @@ class LoginController extends Controller
             return back()->withInput()->with('error', 'Đăng ký không thành công!');
         }
     }
+    
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect('/')->with('success', 'Đăng xuất thành công!');
+    }
 }
