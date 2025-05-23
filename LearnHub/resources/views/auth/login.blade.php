@@ -97,10 +97,10 @@
                             <div class="mt-4 text-center">
                                 <p class="text-muted mb-0">Hoặc đăng nhập với</p>
                                 <div class="d-flex justify-content-center gap-2 mt-3">
-                                    <a href="#" class="btn btn-outline-primary">
+                                    <a href="{{ url('auth/facebook') }}" class="btn btn-outline-primary">
                                         <i class="bi bi-facebook me-2"></i>Facebook
                                     </a>
-                                    <a href="#" class="btn btn-outline-danger">
+                                    <a href="{{ url('auth/google') }}" class="btn btn-outline-danger">
                                         <i class="bi bi-google me-2"></i>Google
                                     </a>
                                 </div>
@@ -172,6 +172,17 @@
                                     </button>
                                 </div>
                             </form>
+                            <div class="mt-4 text-center">
+                                <p class="text-muted mb-0">Hoặc đăng ký với</p>
+                                <div class="d-flex justify-content-center gap-2 mt-3">
+                                    <a href="{{ url('auth/facebook') }}" class="btn btn-outline-primary">
+                                        <i class="bi bi-facebook me-2"></i>Facebook
+                                    </a>
+                                    <a href="{{ url('auth/google') }}" class="btn btn-outline-danger">
+                                        <i class="bi bi-google me-2"></i>Google
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

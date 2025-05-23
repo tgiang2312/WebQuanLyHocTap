@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -56,5 +58,31 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
         
         return redirect('/')->with('success', 'Đăng xuất thành công!');
+    }
+
+    public function redirectToProvider($provider)
+    {
+        return Socialite::driver($provider)->redirect();
+    }
+
+    public function handleProviderCallback($provider)
+    {
+        try {
+            $socialUser = Socialite::driver($provider)->user();
+        } catch (\Exception $e) {
+            return redirect('/login')->with('error', 'Đăng nhập bằng ' . Str::ucfirst($provider) . ' thất bại!');
+        }
+
+        $user = User::where('email', $socialUser->getEmail())->first();
+        if (!$user) {
+            $user = User::create([
+                'name' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'No Name',
+                'email' => $socialUser->getEmail(),
+                'password' => Hash::make(Str::random(16)),
+                'role' => 'student',
+            ]);
+        }
+        Auth::login($user, true);
+        return redirect('/dashboard')->with('success', 'Đăng nhập thành công!');
     }
 }

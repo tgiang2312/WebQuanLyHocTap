@@ -99,3 +99,6 @@ Route::get('/about', function () {
 Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
+
+Route::get('auth/{provider}', [LoginController::class, 'redirectToProvider']);
+Route::get('auth/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
