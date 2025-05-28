@@ -63,6 +63,16 @@
         </div>
     </div>
     
+    <!-- Course Categories -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">Danh mục khóa học</h2>
+            <a href="{{ route('courses.index') }}" class="text-decoration-none">Xem tất cả</a>
+        </div>
+        
+        <x-category-list display-type="grid" />
+    </div>
+    
     <!-- Popular courses section -->
     <div class="mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">

@@ -1,22 +1,28 @@
 @extends('layouts.app')
 
-@section('title', 'Danh sách khóa học - LearnHub')
+@section('title', 'Khóa học {{ $subcategory }} - {{ $category }} - LearnHub')
 
 @section('content')
 <div class="container py-5">
+    <!-- Header -->
     <div class="row mb-5">
         <div class="col-lg-8 mx-auto text-center">
-            <h1 class="fw-bold mb-3">Khóa học</h1>
-            <p class="lead">Khám phá các khóa học chất lượng từ những giáo viên giàu kinh nghiệm</p>
-            @auth
-                @if(Auth::user()->isTeacher() || Auth::user()->isAdmin())
-                <div class="mt-4">
-                    <a href="{{ route('courses.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i> Tạo khóa học mới
-                    </a>
-                </div>
-                @endif
-            @endauth
+            <h1 class="fw-bold mb-3">{{ $subcategory }}</h1>
+            <p class="lead">Khám phá các khóa học {{ $subcategory }} từ những giáo viên giàu kinh nghiệm</p>
+        </div>
+    </div>
+    
+    <!-- Breadcrumb -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('courses.index') }}" class="text-decoration-none">Khóa học</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('courses.category', $categorySlug) }}" class="text-decoration-none">{{ $category }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ $subcategory }}</li>
+                </ol>
+            </nav>
         </div>
     </div>
     
@@ -26,28 +32,21 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <form action="{{ route('courses.index') }}" method="GET" class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Tìm kiếm khóa học..." name="search" value="{{ request('search') }}">
+                                <input type="text" class="form-control" placeholder="Tìm kiếm khóa học {{ $subcategory }}..." name="search" value="{{ request('search') }}">
                                 <button class="btn btn-primary" type="submit">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
                         </div>
+                        <input type="hidden" name="category" value="{{ $categorySlug }}">
+                        <input type="hidden" name="subcategory" value="{{ $subcategorySlug }}">
                         <div class="col-md-4">
-                            <select name="category" class="form-select">
-                                <option value="">Tất cả danh mục</option>
-                                <option value="lap-trinh" {{ request('category') == 'lap-trinh' ? 'selected' : '' }}>Lập trình</option>
-                                <option value="marketing" {{ request('category') == 'marketing' ? 'selected' : '' }}>Marketing</option>
-                                <option value="thiet-ke" {{ request('category') == 'thiet-ke' ? 'selected' : '' }}>Thiết kế</option>
-                                <option value="kinh-doanh" {{ request('category') == 'kinh-doanh' ? 'selected' : '' }}>Kinh doanh</option>
-                                <option value="ngoai-ngu" {{ request('category') == 'ngoai-ngu' ? 'selected' : '' }}>Ngoại ngữ</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
                             <select name="sort" class="form-select">
                                 <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Mới nhất</option>
                                 <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Phổ biến</option>
+                                <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>Đánh giá cao</option>
                             </select>
                         </div>
                     </form>
@@ -56,18 +55,11 @@
         </div>
     </div>
     
-    <!-- Course Categories -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <h3 class="fw-bold mb-4">Danh mục khóa học</h3>
-            <x-category-list display-type="grid" />
-        </div>
-    </div>
-    
     <!-- Course Listings -->
     <div class="row mb-4">
-        <div class="col-12">
-            <h3 class="fw-bold">Tất cả khóa học</h3>
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h3 class="fw-bold mb-0">Khóa học {{ $subcategory }}</h3>
+            <p class="text-muted mb-0">Hiển thị {{ $courses->count() }} khóa học</p>
         </div>
     </div>
     
@@ -85,7 +77,7 @@
                         @endif
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge bg-primary">{{ $course->category ?? 'Khóa học' }}</span>
+                                <span class="badge bg-primary">{{ $course->subcategory ?? $subcategory }}</span>
                                 <span class="text-muted small">
                                     <i class="bi bi-people-fill me-1"></i> {{ $course->students->count() ?? 0 }} học viên
                                 </span>
@@ -116,9 +108,38 @@
         </div>
     @else
         <div class="alert alert-info text-center py-4">
-            <i class="bi bi-info-circle fs-3 mb-3"></i>
-            <p class="mb-0">Không tìm thấy khóa học nào. Vui lòng thử lại với tiêu chí tìm kiếm khác.</p>
+            <i class="bi bi-info-circle fs-3 d-block mb-3"></i>
+            <p class="mb-3">Không tìm thấy khóa học nào trong danh mục "{{ $subcategory }}".</p>
+            <a href="{{ route('courses.category', $categorySlug) }}" class="btn btn-primary">Xem tất cả khóa học {{ $category }}</a>
         </div>
     @endif
+    
+    <!-- Other Subcategories -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="fw-bold mb-4">Các danh mục con khác của {{ $category }}</h3>
+            <div class="row g-4">
+                @foreach(\App\Helpers\CategoryHelper::getSubcategoriesForCategory($categorySlug) as $slug => $name)
+                    @if($name != $subcategory)
+                        <div class="col-lg-3 col-md-6">
+                            <a href="{{ route('courses.subcategory', [$categorySlug, $slug]) }}" class="text-decoration-none">
+                                <div class="card bg-light bg-opacity-75 border-0 h-100">
+                                    <div class="card-body p-4 text-center">
+                                        <div class="mb-3">
+                                            <i class="bi {{ \App\Helpers\CategoryHelper::getSubcategoryIcon($categorySlug, $slug) }}" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <h5 class="fw-semibold">{{ $name }}</h5>
+                                        <p class="mb-0 mt-2">
+                                            <span class="btn btn-sm btn-outline-primary">Khám phá</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    </div>
 </div>
 @endsection 

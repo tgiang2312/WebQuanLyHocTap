@@ -15,6 +15,7 @@ class Course extends Model
         'description',
         'image',
         'category',
+        'subcategory',
         'level',
         'sessions',
         'price',

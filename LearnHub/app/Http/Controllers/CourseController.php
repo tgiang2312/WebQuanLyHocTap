@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Helpers\CategoryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -45,10 +46,11 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category' => 'required|string',
+            'subcategory' => 'required|string',
             'level' => 'required|in:beginner,intermediate,advanced',
             'status' => 'required|in:draft,published',
             'sessions' => 'nullable|integer|min:1',
-            'price' => 'nullable|numeric|min:0',
+            'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|max:2048',
         ]);
 
@@ -130,10 +132,11 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category' => 'required|string',
+            'subcategory' => 'required|string',
             'level' => 'required|in:beginner,intermediate,advanced',
             'status' => 'required|in:draft,published',
             'sessions' => 'nullable|integer|min:1',
-            'price' => 'nullable|numeric|min:0',
+            'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|max:2048',
         ]);
 
@@ -202,15 +205,49 @@ class CourseController extends Controller
      */
     public function category($category)
     {
-        $categoryName = str_replace('-', ' ', $category);
+        $categories = CategoryHelper::getCategories();
+        $categoryName = $categories[$category] ?? ucwords(str_replace('-', ' ', $category));
+        
         $courses = Course::where('status', 'published')
-                        ->where('category', 'like', "%{$categoryName}%")
+                        ->where('category', $categoryName)
                         ->with('teacher')
                         ->get();
         
+        // Get subcategories for this category
+        $subcategories = CategoryHelper::getSubcategoriesForCategory($category);
+        
         return view('courses.category', [
             'courses' => $courses,
-            'category' => ucwords($categoryName)
+            'category' => $categoryName,
+            'categorySlug' => $category,
+            'subcategories' => $subcategories
+        ]);
+    }
+    
+    /**
+     * Display courses by subcategory.
+     */
+    public function subcategory($category, $subcategory)
+    {
+        $categories = CategoryHelper::getCategories();
+        $subcategories = CategoryHelper::getSubcategories();
+        
+        $categoryName = $categories[$category] ?? ucwords(str_replace('-', ' ', $category));
+        $subcategoryName = $subcategories[$category][$subcategory] ?? ucwords(str_replace('-', ' ', $subcategory));
+        
+        $courses = Course::where('status', 'published')
+                        ->where('category', $categoryName)
+                        ->where('subcategory', $subcategoryName)
+                        ->with('teacher')
+                        ->get();
+        
+        return view('courses.subcategory', [
+            'courses' => $courses,
+            'category' => $categoryName,
+            'categorySlug' => $category,
+            'subcategory' => $subcategoryName,
+            'subcategorySlug' => $subcategory,
+            'subcategories' => $subcategories[$category] ?? []
         ]);
     }
     

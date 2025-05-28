@@ -25,6 +25,31 @@
         </div>
     </div>
     
+    <!-- Subcategories -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="fw-bold mb-4">Danh mục con của {{ $category }}</h3>
+            <div class="row g-4">
+                @foreach($subcategories as $slug => $name)
+                <div class="col-lg-4 col-md-6">
+                    <a href="{{ route('courses.subcategory', [$categorySlug, $slug]) }}" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100 hover-card">
+                            <div class="card-body p-4 text-center">
+                                <div class="mb-3">
+                                    <i class="bi {{ \App\Helpers\CategoryHelper::getSubcategoryIcon($categorySlug, $slug) }}" style="font-size: 2.5rem;"></i>
+                                </div>
+                                <h4 class="fw-semibold">{{ $name }}</h4>
+                                <p class="text-muted mb-3">Khám phá các khóa học {{ $name }} chất lượng cao</p>
+                                <span class="btn btn-outline-primary">Xem khóa học</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    
     <!-- Search & Filter -->
     <div class="row mb-5">
         <div class="col-lg-8 mx-auto">
@@ -56,7 +81,7 @@
     <!-- Course Listings -->
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
-            <h3 class="fw-bold mb-0">Khóa học {{ $category }}</h3>
+            <h3 class="fw-bold mb-0">Tất cả khóa học {{ $category }}</h3>
             <p class="text-muted mb-0">Hiển thị {{ $courses->count() }} khóa học</p>
         </div>
     </div>
@@ -66,8 +91,8 @@
             @foreach ($courses as $course)
                 <div class="col-lg-4 col-md-6">
                     <div class="card border-0 shadow-sm h-100">
-                        @if ($course->thumbnail)
-                            <img src="{{ Storage::url($course->thumbnail) }}" class="card-img-top" alt="{{ $course->title }}" style="height: 200px; object-fit: cover;">
+                        @if ($course->image)
+                            <img src="{{ Storage::url($course->image) }}" class="card-img-top" alt="{{ $course->title }}" style="height: 200px; object-fit: cover;">
                         @else
                             <div class="bg-light text-center py-5">
                                 <i class="bi bi-image text-secondary" style="font-size: 4rem;"></i>
@@ -75,7 +100,7 @@
                         @endif
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge bg-primary">{{ $course->category ?? $category }}</span>
+                                <span class="badge bg-primary">{{ $course->subcategory ?? $category }}</span>
                                 <span class="text-muted small">
                                     <i class="bi bi-people-fill me-1"></i> {{ $course->students->count() ?? 0 }} học viên
                                 </span>
@@ -117,26 +142,32 @@
         <div class="col-12">
             <h3 class="fw-bold mb-4">Danh mục khác</h3>
             <div class="row g-4">
-                @php
-                    $categories = [
-                        ['name' => 'Lập trình', 'slug' => 'lap-trinh', 'icon' => 'bi-code-square', 'color' => 'primary'],
-                        ['name' => 'Marketing', 'slug' => 'marketing', 'icon' => 'bi-graph-up', 'color' => 'success'],
-                        ['name' => 'Thiết kế', 'slug' => 'thiet-ke', 'icon' => 'bi-brush', 'color' => 'danger'],
-                        ['name' => 'Kinh doanh', 'slug' => 'kinh-doanh', 'icon' => 'bi-briefcase', 'color' => 'warning'],
-                        ['name' => 'Ngoại ngữ', 'slug' => 'ngoai-ngu', 'icon' => 'bi-translate', 'color' => 'info']
-                    ];
-                @endphp
-                
-                @foreach($categories as $cat)
-                    @if(strtolower($cat['name']) != strtolower($category))
+                @foreach(\App\Helpers\CategoryHelper::getCategories() as $slug => $name)
+                    @if(strtolower($name) != strtolower($category))
                         <div class="col-lg-3 col-md-6">
-                            <a href="{{ route('courses.category', $cat['slug']) }}" class="text-decoration-none">
-                                <div class="card bg-{{ $cat['color'] }} bg-opacity-10 border-0 h-100">
+                            <a href="{{ route('courses.category', $slug) }}" class="text-decoration-none">
+                                <div class="card bg-opacity-10 border-0 h-100 
+                                    @if(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'primary') !== false) bg-primary
+                                    @elseif(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'success') !== false) bg-success
+                                    @elseif(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'danger') !== false) bg-danger
+                                    @elseif(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'warning') !== false) bg-warning
+                                    @elseif(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'info') !== false) bg-info
+                                    @else bg-secondary
+                                    @endif">
                                     <div class="card-body p-4 text-center">
-                                        <i class="bi {{ $cat['icon'] }} text-{{ $cat['color'] }} fs-1 mb-3"></i>
-                                        <h5 class="fw-semibold">{{ $cat['name'] }}</h5>
+                                        <div class="mb-3">
+                                            <i class="bi {{ \App\Helpers\CategoryHelper::getCategoryIcon($slug) }}" style="font-size: 2.5rem;"></i>
+                                        </div>
+                                        <h5 class="fw-semibold">{{ $name }}</h5>
                                         <p class="mb-0 mt-2">
-                                            <span class="btn btn-sm btn-outline-{{ $cat['color'] }}">Khám phá</span>
+                                            <span class="btn btn-sm 
+                                                @if(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'primary') !== false) btn-outline-primary
+                                                @elseif(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'success') !== false) btn-outline-success
+                                                @elseif(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'danger') !== false) btn-outline-danger
+                                                @elseif(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'warning') !== false) btn-outline-warning
+                                                @elseif(strpos(\App\Helpers\CategoryHelper::getCategoryIcon($slug), 'info') !== false) btn-outline-info
+                                                @else btn-outline-secondary
+                                                @endif">Khám phá</span>
                                         </p>
                                     </div>
                                 </div>
