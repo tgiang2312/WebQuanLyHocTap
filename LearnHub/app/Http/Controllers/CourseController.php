@@ -55,7 +55,12 @@ class CourseController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('images/courses', 'public');
+            // Lưu hình ảnh vào database thay vì lưu đường dẫn
+            $imageFile = $request->file('image');
+            $validated['image_data'] = file_get_contents($imageFile->getRealPath());
+            
+            // Vẫn lưu đường dẫn để tương thích với code cũ
+            $path = $imageFile->store('images/courses', 'public');
             $validated['image'] = $path;
         }
 
@@ -125,7 +130,7 @@ class CourseController extends Controller
     public function update(Request $request, Course $course)
     {
         if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
-            return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền chỉnh sửa khóa học này');
+            return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền cập nhật khóa học này');
         }
 
         $validated = $request->validate([
@@ -141,12 +146,17 @@ class CourseController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
+            // Lưu hình ảnh vào database thay vì lưu đường dẫn
+            $imageFile = $request->file('image');
+            $validated['image_data'] = file_get_contents($imageFile->getRealPath());
+            
+            // Vẫn lưu đường dẫn để tương thích với code cũ
             // Delete old image if exists
             if ($course->image) {
                 Storage::disk('public')->delete($course->image);
             }
             
-            $path = $request->file('image')->store('images/courses', 'public');
+            $path = $imageFile->store('images/courses', 'public');
             $validated['image'] = $path;
         }
 

@@ -76,7 +76,7 @@
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td>
-                                    <img src="{{ $course->image ? asset('storage/' . $course->image) : asset('images/placeholder.jpg') }}" 
+                                    <img src="{{ $course->image_data || $course->image ? $course->imageUrl : asset('images/placeholder.jpg') }}" 
                                          alt="{{ $course->title }}" class="img-thumbnail" 
                                          style="width: 80px; height: 60px; object-fit: cover;">
                                 </td>

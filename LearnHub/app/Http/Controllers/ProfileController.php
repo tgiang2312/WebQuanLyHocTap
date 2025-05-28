@@ -63,13 +63,22 @@ class ProfileController extends Controller
             ]);
             
             if ($request->hasFile('avatar')) {
-                // Xóa ảnh cũ nếu có
-                if ($user->avatar) {
-                    Storage::disk('public')->delete($user->avatar);
+                try {
+                    // Lưu avatar vào database thay vì lưu đường dẫn
+                    $avatarFile = $request->file('avatar');
+                    $user->avatar_data = file_get_contents($avatarFile->getRealPath());
+                    
+                    // Vẫn lưu đường dẫn để tương thích với code cũ
+                    // Xóa ảnh cũ nếu có
+                    if ($user->avatar) {
+                        Storage::disk('public')->delete($user->avatar);
+                    }
+                    
+                    $path = $avatarFile->store('avatars', 'public');
+                    $user->avatar = $path;
+                } catch (\Exception $e) {
+                    return back()->withErrors(['avatar' => 'Có lỗi khi xử lý hình ảnh: ' . $e->getMessage()]);
                 }
-                
-                $path = $request->file('avatar')->store('avatars', 'public');
-                $user->avatar = $path;
             }
             
             $user->name = $request->name;

@@ -1,6 +1,6 @@
 <div class="card h-100 border-0 shadow-sm course-card">
     <div class="position-relative">
-        <img src="{{ $course['image'] ?? asset('images/placeholder.jpg') }}" 
+        <img src="{{ isset($course['imageUrl']) ? $course['imageUrl'] : ($course['image'] ?? asset('images/placeholder.jpg')) }}" 
              alt="{{ $course['title'] }}" class="card-img-top" style="height: 180px; object-fit: cover;">
         <span class="position-absolute top-0 end-0 badge bg-primary m-2">
             {{ $course['category'] }}

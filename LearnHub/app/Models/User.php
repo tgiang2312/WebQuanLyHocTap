@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'role',
         'avatar',
+        'avatar_data',
         'bio',
         'phone',
         'birthday',
@@ -53,6 +54,28 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    
+    /**
+     * Accessor để lấy URL của avatar từ dữ liệu binary
+     * 
+     * @return string|null
+     */
+    public function getAvatarUrlAttribute()
+    {
+        // Nếu có dữ liệu avatar binary
+        if (!empty($this->avatar_data)) {
+            // Trả về URL dạng data URI
+            return 'data:image/jpeg;base64,' . base64_encode($this->avatar_data);
+        }
+        
+        // Nếu vẫn còn đường dẫn avatar cũ
+        if (!empty($this->avatar)) {
+            return asset('storage/' . $this->avatar);
+        }
+        
+        // Nếu không có avatar
+        return null;
+    }
     
     // Courses taught by teacher
     public function teachingCourses()

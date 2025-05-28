@@ -91,8 +91,8 @@
             @foreach ($courses as $course)
                 <div class="col-lg-4 col-md-6">
                     <div class="card border-0 shadow-sm h-100">
-                        @if ($course->image)
-                            <img src="{{ Storage::url($course->image) }}" class="card-img-top" alt="{{ $course->title }}" style="height: 200px; object-fit: cover;">
+                        @if ($course->image_data || $course->image)
+                            <img src="{{ $course->imageUrl }}" class="card-img-top" alt="{{ $course->title }}" style="height: 200px; object-fit: cover;">
                         @else
                             <div class="bg-light text-center py-5">
                                 <i class="bi bi-image text-secondary" style="font-size: 4rem;"></i>

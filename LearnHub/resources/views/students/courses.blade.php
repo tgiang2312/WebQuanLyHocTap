@@ -56,7 +56,7 @@
             <div class="col-md-6 col-lg-4">
                 <div class="card border-0 shadow-sm h-100 course-card">
                     <div class="position-relative">
-                        <img src="{{ $course['image'] ?? asset('images/placeholder.jpg') }}" 
+                        <img src="{{ isset($course['imageUrl']) ? $course['imageUrl'] : ($course['image'] ?? asset('images/placeholder.jpg')) }}" 
                              alt="{{ $course['title'] }}" class="card-img-top" 
                              style="height: 180px; object-fit: cover;">
                              

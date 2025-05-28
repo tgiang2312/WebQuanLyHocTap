@@ -126,9 +126,9 @@
                         
                         <div class="mb-4">
                             <label for="image" class="form-label fw-semibold">Ảnh đại diện khóa học</label>
-                            @if($course->image)
+                            @if($course->image_data || $course->image)
                                 <div class="mb-3">
-                                    <img src="{{ asset('storage/' . $course->image) }}" alt="{{ $course->title }}" 
+                                    <img src="{{ $course->imageUrl }}" alt="{{ $course->title }}" 
                                          class="img-thumbnail" style="max-height: 200px;">
                                     <div class="form-text">Ảnh hiện tại. Tải lên ảnh mới để thay thế.</div>
                                 </div>
