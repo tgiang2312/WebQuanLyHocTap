@@ -29,7 +29,25 @@ class TeacherController extends Controller
             $totalStudents += $course->enrollments()->count();
         }
         
-        return view('teachers.dashboard', compact('myCreatedCourses', 'totalStudents'));
+        // Lấy các hoạt động gần đây liên quan đến khóa học của giảng viên
+        $recentActivities = \App\Models\Activity::whereHas('course', function ($query) {
+                $query->where('teacher_id', Auth::id());
+            })
+            ->with(['user', 'course'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        
+        // Lấy các bài tập gần đây của giảng viên
+        $recentAssignments = Assignment::whereHas('course', function ($query) {
+                $query->where('teacher_id', Auth::id());
+            })
+            ->with(['course', 'submissions'])
+            ->orderBy('due_date', 'asc')
+            ->take(5)
+            ->get();
+        
+        return view('teachers.dashboard', compact('myCreatedCourses', 'totalStudents', 'recentActivities', 'recentAssignments'));
     }
     
     /**
@@ -248,20 +266,14 @@ class TeacherController extends Controller
     public function activities()
     {
         // Lấy danh sách hoạt động gần đây liên quan đến khóa học của giảng viên
-        $activities = DB::table('activities')
-            ->join('users', 'activities.user_id', '=', 'users.id')
-            ->join('courses', 'activities.course_id', '=', 'courses.id')
-            ->where('courses.teacher_id', Auth::id())
-            ->select(
-                'activities.id',
-                'activities.activity_type',
-                'activities.created_at',
-                'users.name as user_name',
-                'courses.title as course_title'
-            )
-            ->orderBy('activities.created_at', 'desc')
-            ->paginate(20);
-            
+        $activities = \App\Models\Activity::whereHas('course', function ($query) {
+                $query->where('teacher_id', Auth::id());
+            })
+            ->orWhere('user_id', Auth::id())
+            ->with(['user', 'course'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+        
         return view('teachers.activities', compact('activities'));
     }
 } 

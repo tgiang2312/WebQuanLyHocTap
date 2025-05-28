@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -46,6 +47,15 @@ class EnrollmentController extends Controller
             'status' => 'active',
             'progress' => 0,
         ]);
+        
+        // Ghi lại hoạt động
+        Activity::log(
+            Auth::id(),
+            'enrollment',
+            'Đã đăng ký khóa học: ' . $course->title,
+            null,
+            $course->id
+        );
         
         return redirect()->route('courses.show', $course)
             ->with('success', 'Bạn đã đăng ký khóa học thành công');
@@ -137,5 +147,32 @@ class EnrollmentController extends Controller
         $enrollments = $course->enrollments()->with('student')->get();
         
         return view('enrollments.students', compact('course', 'enrollments'));
+    }
+
+    /**
+     * Đăng ký khóa học mới
+     */
+    public function store(Request $request, Course $course)
+    {
+        // ... existing code ...
+        
+        // Tạo bản ghi đăng ký
+        $enrollment = new Enrollment();
+        $enrollment->user_id = Auth::id();
+        $enrollment->course_id = $course->id;
+        $enrollment->status = 'active';
+        $enrollment->progress = 0;
+        $enrollment->save();
+        
+        // Ghi lại hoạt động
+        Activity::log(
+            Auth::id(),
+            'enrollment',
+            'Đã đăng ký khóa học: ' . $course->title,
+            null,
+            $course->id
+        );
+        
+        // ... existing code ...
     }
 } 

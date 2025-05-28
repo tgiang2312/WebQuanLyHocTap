@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Helpers\CategoryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -45,15 +46,21 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category' => 'required|string',
+            'subcategory' => 'required|string',
             'level' => 'required|in:beginner,intermediate,advanced',
             'status' => 'required|in:draft,published',
             'sessions' => 'nullable|integer|min:1',
-            'price' => 'nullable|numeric|min:0',
+            'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('images/courses', 'public');
+            // Lưu hình ảnh vào database thay vì lưu đường dẫn
+            $imageFile = $request->file('image');
+            $validated['image_data'] = file_get_contents($imageFile->getRealPath());
+            
+            // Vẫn lưu đường dẫn để tương thích với code cũ
+            $path = $imageFile->store('images/courses', 'public');
             $validated['image'] = $path;
         }
 
@@ -123,27 +130,33 @@ class CourseController extends Controller
     public function update(Request $request, Course $course)
     {
         if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
-            return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền chỉnh sửa khóa học này');
+            return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền cập nhật khóa học này');
         }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'category' => 'required|string',
+            'subcategory' => 'required|string',
             'level' => 'required|in:beginner,intermediate,advanced',
             'status' => 'required|in:draft,published',
             'sessions' => 'nullable|integer|min:1',
-            'price' => 'nullable|numeric|min:0',
+            'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
+            // Lưu hình ảnh vào database thay vì lưu đường dẫn
+            $imageFile = $request->file('image');
+            $validated['image_data'] = file_get_contents($imageFile->getRealPath());
+            
+            // Vẫn lưu đường dẫn để tương thích với code cũ
             // Delete old image if exists
             if ($course->image) {
                 Storage::disk('public')->delete($course->image);
             }
             
-            $path = $request->file('image')->store('images/courses', 'public');
+            $path = $imageFile->store('images/courses', 'public');
             $validated['image'] = $path;
         }
 
@@ -202,15 +215,49 @@ class CourseController extends Controller
      */
     public function category($category)
     {
-        $categoryName = str_replace('-', ' ', $category);
+        $categories = CategoryHelper::getCategories();
+        $categoryName = $categories[$category] ?? ucwords(str_replace('-', ' ', $category));
+        
         $courses = Course::where('status', 'published')
-                        ->where('category', 'like', "%{$categoryName}%")
+                        ->where('category', $categoryName)
                         ->with('teacher')
                         ->get();
         
+        // Get subcategories for this category
+        $subcategories = CategoryHelper::getSubcategoriesForCategory($category);
+        
         return view('courses.category', [
             'courses' => $courses,
-            'category' => ucwords($categoryName)
+            'category' => $categoryName,
+            'categorySlug' => $category,
+            'subcategories' => $subcategories
+        ]);
+    }
+    
+    /**
+     * Display courses by subcategory.
+     */
+    public function subcategory($category, $subcategory)
+    {
+        $categories = CategoryHelper::getCategories();
+        $subcategories = CategoryHelper::getSubcategories();
+        
+        $categoryName = $categories[$category] ?? ucwords(str_replace('-', ' ', $category));
+        $subcategoryName = $subcategories[$category][$subcategory] ?? ucwords(str_replace('-', ' ', $subcategory));
+        
+        $courses = Course::where('status', 'published')
+                        ->where('category', $categoryName)
+                        ->where('subcategory', $subcategoryName)
+                        ->with('teacher')
+                        ->get();
+        
+        return view('courses.subcategory', [
+            'courses' => $courses,
+            'category' => $categoryName,
+            'categorySlug' => $category,
+            'subcategory' => $subcategoryName,
+            'subcategorySlug' => $subcategory,
+            'subcategories' => $subcategories[$category] ?? []
         ]);
     }
     

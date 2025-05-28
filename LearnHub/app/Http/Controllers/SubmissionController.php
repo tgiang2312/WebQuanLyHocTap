@@ -7,6 +7,7 @@ use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Activity;
 
 class SubmissionController extends Controller
 {
@@ -120,9 +121,9 @@ class SubmissionController extends Controller
     }
     
     /**
-     * Chấm điểm bài nộp
+     * Cập nhật điểm và phản hồi cho bài nộp
      */
-    public function grade(Request $request, Submission $submission)
+    public function update(Request $request, Submission $submission)
     {
         // Kiểm tra quyền chấm điểm
         if (Auth::id() !== $submission->assignment->course->teacher_id && 
@@ -136,11 +137,19 @@ class SubmissionController extends Controller
         ]);
         
         $submission->score = $request->score;
-        $submission->grade = $request->score;
         $submission->feedback = $request->feedback;
-        $submission->graded_at = now();
         $submission->status = 'graded';
+        $submission->graded_at = now();
         $submission->save();
+        
+        // Ghi lại hoạt động
+        Activity::log(
+            Auth::id(),
+            'grading',
+            'Đã chấm điểm bài tập của: ' . $submission->student->name,
+            'Điểm: ' . $submission->score . '/' . $submission->assignment->max_score,
+            $submission->assignment->course_id
+        );
         
         return redirect()->back()->with('success', 'Bài nộp đã được chấm điểm thành công.');
     }

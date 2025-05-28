@@ -60,79 +60,7 @@
     <div class="row mb-5">
         <div class="col-12">
             <h3 class="fw-bold mb-4">Danh mục khóa học</h3>
-            <div class="row g-4">
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a href="{{ route('courses.category', 'lap-trinh') }}" class="text-decoration-none">
-                        <div class="card bg-primary bg-opacity-10 border-0 h-100 text-center">
-                            <div class="card-body py-4">
-                                <i class="bi bi-code-square text-primary fs-1 mb-3"></i>
-                                <h5 class="fw-semibold">Lập trình</h5>
-                                <p class="small text-muted mb-0">25 khóa học</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a href="{{ route('courses.category', 'marketing') }}" class="text-decoration-none">
-                        <div class="card bg-success bg-opacity-10 border-0 h-100 text-center">
-                            <div class="card-body py-4">
-                                <i class="bi bi-graph-up text-success fs-1 mb-3"></i>
-                                <h5 class="fw-semibold">Marketing</h5>
-                                <p class="small text-muted mb-0">18 khóa học</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a href="{{ route('courses.category', 'thiet-ke') }}" class="text-decoration-none">
-                        <div class="card bg-danger bg-opacity-10 border-0 h-100 text-center">
-                            <div class="card-body py-4">
-                                <i class="bi bi-brush text-danger fs-1 mb-3"></i>
-                                <h5 class="fw-semibold">Thiết kế</h5>
-                                <p class="small text-muted mb-0">15 khóa học</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a href="{{ route('courses.category', 'kinh-doanh') }}" class="text-decoration-none">
-                        <div class="card bg-warning bg-opacity-10 border-0 h-100 text-center">
-                            <div class="card-body py-4">
-                                <i class="bi bi-briefcase text-warning fs-1 mb-3"></i>
-                                <h5 class="fw-semibold">Kinh doanh</h5>
-                                <p class="small text-muted mb-0">12 khóa học</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a href="{{ route('courses.category', 'ngoai-ngu') }}" class="text-decoration-none">
-                        <div class="card bg-info bg-opacity-10 border-0 h-100 text-center">
-                            <div class="card-body py-4">
-                                <i class="bi bi-translate text-info fs-1 mb-3"></i>
-                                <h5 class="fw-semibold">Ngoại ngữ</h5>
-                                <p class="small text-muted mb-0">20 khóa học</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a href="{{ route('courses.index') }}" class="text-decoration-none">
-                        <div class="card bg-secondary bg-opacity-10 border-0 h-100 text-center">
-                            <div class="card-body py-4">
-                                <i class="bi bi-grid text-secondary fs-1 mb-3"></i>
-                                <h5 class="fw-semibold">Tất cả</h5>
-                                <p class="small text-muted mb-0">90 khóa học</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
+            <x-category-list display-type="grid" />
         </div>
     </div>
     
@@ -148,8 +76,8 @@
             @foreach ($courses as $course)
                 <div class="col-lg-4 col-md-6">
                     <div class="card border-0 shadow-sm h-100">
-                        @if ($course->image)
-                            <img src="{{ Storage::url($course->image) }}" class="card-img-top" alt="{{ $course->title }}" style="height: 200px; object-fit: cover;">
+                        @if ($course->image_data || $course->image)
+                            <img src="{{ $course->imageUrl }}" class="card-img-top" alt="{{ $course->title }}" style="height: 200px; object-fit: cover;">
                         @else
                             <div class="bg-light text-center py-5">
                                 <i class="bi bi-image text-secondary" style="font-size: 4rem;"></i>

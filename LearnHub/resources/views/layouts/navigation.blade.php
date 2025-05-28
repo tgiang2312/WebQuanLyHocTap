@@ -14,7 +14,7 @@
             </button>
             
             <!-- Navigation Items -->
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Trang chủ</a>
@@ -48,10 +48,11 @@
                         </li>
                         @endif
                         
-                        @if(Auth::user()->role === 'teacher' || Auth::user()->role === 'admin')
+                        @if(Auth::user()->role === 'teacher')
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="teacherDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-person-workspace"></i> Giảng viên
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="teacherDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-workspace me-2"></i>
+                                    Giảng viên
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="teacherDropdown">
                                     <li><a class="dropdown-item" href="{{ route('teachers.dashboard') }}">Bảng điều khiển</a></li>
@@ -64,10 +65,11 @@
                             </li>
                         @endif
                         
-                        @if(Auth::user()->role === 'student' || Auth::user()->role === 'admin')
+                        @if(Auth::user()->role === 'student')
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="studentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-person-badge"></i> Học viên
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="studentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    Học viên
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="studentDropdown">
                                     <li><a class="dropdown-item" href="{{ route('students.dashboard') }}">Bảng điều khiển</a></li>
@@ -79,21 +81,38 @@
                         @endif
                         
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @if(Auth::user()->avatar_data || Auth::user()->avatar)
+                                    <img src="{{ Auth::user()->avatarUrl }}" alt="{{ Auth::user()->name }}" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                                @else
+                                    <i class="bi bi-person-circle me-2"></i>
+                                @endif
+                                {{ Auth::user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <li>
-                                    <span class="dropdown-item-text text-muted small">
-                                        <strong>Vai trò:</strong> 
-                                        @if(Auth::user()->role === 'admin')
-                                            <span class="badge bg-danger">Quản trị viên</span>
-                                        @elseif(Auth::user()->role === 'teacher')
-                                            <span class="badge bg-primary">Giảng viên</span>
+                                    <div class="dropdown-item d-flex align-items-center">
+                                        @if(Auth::user()->avatar_data || Auth::user()->avatar)
+                                            <img src="{{ Auth::user()->avatarUrl }}" alt="{{ Auth::user()->name }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
                                         @else
-                                            <span class="badge bg-success">Học viên</span>
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-person text-secondary"></i>
+                                            </div>
                                         @endif
-                                    </span>
+                                        <div>
+                                            <strong>{{ Auth::user()->name }}</strong>
+                                            <div class="text-muted small">{{ Auth::user()->email }}</div>
+                                            <div class="mt-1">
+                                                @if(Auth::user()->role === 'admin')
+                                                    <span class="badge bg-danger">Quản trị viên</span>
+                                                @elseif(Auth::user()->role === 'teacher')
+                                                    <span class="badge bg-primary">Giảng viên</span>
+                                                @else
+                                                    <span class="badge bg-success">Học viên</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>Hồ sơ</a></li>

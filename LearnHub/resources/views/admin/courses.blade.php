@@ -94,7 +94,7 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
-                                        <img src="{{ $course->image ? asset('storage/' . $course->image) : asset('images/course-placeholder.jpg') }}" 
+                                        <img src="{{ $course->image_data || $course->image ? $course->imageUrl : asset('images/course-placeholder.jpg') }}" 
                                              alt="{{ $course->title }}" class="rounded" width="50" height="50" style="object-fit: cover;">
                                     </div>
                                     <div class="ms-3">

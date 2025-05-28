@@ -139,6 +139,7 @@ Route::put('/courses/{course}', [CourseController::class, 'update'])->middleware
 Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->middleware(['auth'])->name('courses.destroy');
 Route::get('/my-courses', [CourseController::class, 'myCourses'])->middleware('auth')->name('courses.my');
 Route::get('/courses/category/{category}', [CourseController::class, 'category'])->name('courses.category');
+Route::get('/courses/category/{category}/{subcategory}', [CourseController::class, 'subcategory'])->name('courses.subcategory');
 
 // Lesson routes
 Route::get('/courses/{course}/lessons/create', [LessonController::class, 'create'])->middleware(['auth', 'role:teacher,admin'])->name('lessons.create');

@@ -9,6 +9,9 @@
         <div class="row g-4">
             <div class="col-lg-8">
                 <span class="badge bg-primary mb-3">{{ $course->category }}</span>
+                @if($course->subcategory)
+                <span class="badge bg-secondary mb-3">{{ $course->subcategory }}</span>
+                @endif
                 <h1 class="fw-bold mb-3">{{ $course->title }}</h1>
                 <p class="lead mb-4">{{ $course->description }}</p>
                 

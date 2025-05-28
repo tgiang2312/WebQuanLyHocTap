@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Assignment;
 use App\Models\Lesson;
+use App\Models\Activity;
+use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -87,6 +89,30 @@ class AssignmentController extends Controller
         }
         
         $assignment->save();
+        
+        // Lưu thông tin bài nộp
+        $submission = new Submission();
+        $submission->assignment_id = $assignment->id;
+        $submission->user_id = Auth::id();
+        $submission->content = $request->content;
+        $submission->status = 'submitted';
+        $submission->submitted_at = now();
+        
+        // Kiểm tra nếu nộp muộn
+        if ($assignment->due_date && now() > $assignment->due_date) {
+            $submission->is_late = true;
+        }
+        
+        $submission->save();
+        
+        // Ghi lại hoạt động
+        Activity::log(
+            Auth::id(),
+            'submission',
+            'Đã nộp bài tập: ' . $assignment->title,
+            null,
+            $assignment->course_id
+        );
         
         return redirect()->route('assignments.show', $assignment)
             ->with('success', 'Bài tập đã được tạo thành công');

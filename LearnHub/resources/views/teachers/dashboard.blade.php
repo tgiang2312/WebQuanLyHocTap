@@ -136,38 +136,34 @@
                 </div>
                 <div class="card-body">
                     <div class="timeline">
+                        @forelse($recentActivities as $activity)
                         <div class="timeline-item mb-4 position-relative ps-4">
                             <div class="timeline-marker"></div>
                             <div class="bg-light p-3 rounded">
                                 <div class="d-flex justify-content-between">
-                                    <p class="fw-medium mb-1">Nguyễn Văn A đã đăng ký khóa học</p>
-                                    <small class="text-muted">1 giờ trước</small>
+                                    <p class="fw-medium mb-1">
+                                        <i class="bi {{ $activity->icon }} me-2"></i>
+                                        {{ $activity->user->name ?? 'Người dùng' }}
+                                    </p>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($activity->created_at)->diffForHumans() }}</small>
                                 </div>
-                                <p class="text-muted mb-0">Lập trình web với Laravel</p>
+                                <p class="text-muted mb-0">
+                                    {{ $activity->title }}
+                                    @if($activity->course)
+                                        <strong>{{ $activity->course->title }}</strong>
+                                    @endif
+                                </p>
+                                @if($activity->description)
+                                    <p class="text-muted small mb-0">{{ $activity->description }}</p>
+                                @endif
                             </div>
                         </div>
-                        
-                        <div class="timeline-item mb-4 position-relative ps-4">
-                            <div class="timeline-marker"></div>
-                            <div class="bg-light p-3 rounded">
-                                <div class="d-flex justify-content-between">
-                                    <p class="fw-medium mb-1">Trần Thị B đã nộp bài tập</p>
-                                    <small class="text-muted">2 giờ trước</small>
-                                </div>
-                                <p class="text-muted mb-0">Bài tập 1: Xây dựng website bán hàng</p>
-                            </div>
+                        @empty
+                        <div class="text-center py-4">
+                            <i class="bi bi-clock-history fs-1 text-muted mb-3"></i>
+                            <p class="text-muted">Chưa có hoạt động nào gần đây</p>
                         </div>
-                        
-                        <div class="timeline-item mb-4 position-relative ps-4">
-                            <div class="timeline-marker"></div>
-                            <div class="bg-light p-3 rounded">
-                                <div class="d-flex justify-content-between">
-                                    <p class="fw-medium mb-1">Lê Văn C đã hoàn thành khóa học</p>
-                                    <small class="text-muted">5 giờ trước</small>
-                                </div>
-                                <p class="text-muted mb-0">Digital Marketing cơ bản</p>
-                            </div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
                 <div class="card-footer bg-white border-top py-3">
@@ -224,45 +220,33 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($recentAssignments as $assignment)
                             <tr>
-                                <td>Bài tập 1: Thiết kế giao diện</td>
-                                <td>UI/UX Design</td>
-                                <td>15/30</td>
-                                <td>30/06/2025</td>
-                                <td><span class="badge bg-success">Đang mở</span></td>
+                                <td>{{ $assignment->title }}</td>
+                                <td>{{ $assignment->course->title }}</td>
+                                <td>{{ $assignment->submissions->count() }}/{{ $assignment->course->enrollments->count() }}</td>
+                                <td>{{ $assignment->due_date ? $assignment->due_date->format('d/m/Y') : 'Không có' }}</td>
+                                <td>
+                                    @if(!$assignment->due_date || $assignment->due_date > now())
+                                        <span class="badge bg-success">Đang mở</span>
+                                    @else
+                                        <span class="badge bg-danger">Đã hết hạn</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="#" class="btn btn-outline-primary">Xem</a>
-                                        <a href="#" class="btn btn-outline-secondary">Sửa</a>
+                                        <a href="{{ route('assignments.show', $assignment) }}" class="btn btn-outline-primary">Xem</a>
+                                        <a href="{{ route('assignments.edit', $assignment) }}" class="btn btn-outline-secondary">Sửa</a>
                                     </div>
                                 </td>
                             </tr>
+                            @empty
                             <tr>
-                                <td>Bài tập 2: Thiết kế cơ sở dữ liệu</td>
-                                <td>Web Backend</td>
-                                <td>8/25</td>
-                                <td>15/07/2025</td>
-                                <td><span class="badge bg-success">Đang mở</span></td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="#" class="btn btn-outline-primary">Xem</a>
-                                        <a href="#" class="btn btn-outline-secondary">Sửa</a>
-                                    </div>
+                                <td colspan="6" class="text-center py-4">
+                                    <p class="text-muted mb-0">Chưa có bài tập nào được tạo</p>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>Bài tập 3: Xây dựng API</td>
-                                <td>RESTful API</td>
-                                <td>0/20</td>
-                                <td>10/08/2025</td>
-                                <td><span class="badge bg-warning">Bản nháp</span></td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="#" class="btn btn-outline-primary">Xem</a>
-                                        <a href="#" class="btn btn-outline-secondary">Sửa</a>
-                                    </div>
-                                </td>
-                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

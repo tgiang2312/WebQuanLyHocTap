@@ -35,56 +35,24 @@
                     <div class="list-group-item py-3 px-4">
                         <div class="d-flex align-items-center">
                             <div class="activity-icon me-3">
-                                @switch($activity->activity_type)
-                                    @case('enrollment')
-                                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
-                                            <i class="bi bi-person-plus fs-5 text-primary"></i>
-                                        </div>
-                                        @break
-                                    @case('completion')
-                                        <div class="bg-success bg-opacity-10 p-2 rounded-circle">
-                                            <i class="bi bi-check-circle fs-5 text-success"></i>
-                                        </div>
-                                        @break
-                                    @case('submission')
-                                        <div class="bg-info bg-opacity-10 p-2 rounded-circle">
-                                            <i class="bi bi-file-earmark-text fs-5 text-info"></i>
-                                        </div>
-                                        @break
-                                    @case('comment')
-                                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle">
-                                            <i class="bi bi-chat-left-text fs-5 text-warning"></i>
-                                        </div>
-                                        @break
-                                    @default
-                                        <div class="bg-secondary bg-opacity-10 p-2 rounded-circle">
-                                            <i class="bi bi-clock-history fs-5 text-secondary"></i>
-                                        </div>
-                                @endswitch
+                                <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
+                                    <i class="bi {{ $activity->icon }} fs-5 text-primary"></i>
+                                </div>
                             </div>
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h6 class="mb-0 fw-semibold">{{ $activity->user_name }}</h6>
+                                    <h6 class="mb-0 fw-semibold">{{ $activity->user->name ?? 'Người dùng' }}</h6>
                                     <span class="text-muted small">{{ \Carbon\Carbon::parse($activity->created_at)->diffForHumans() }}</span>
                                 </div>
                                 <p class="mb-0">
-                                    @switch($activity->activity_type)
-                                        @case('enrollment')
-                                            Đã đăng ký khóa học <strong>{{ $activity->course_title }}</strong>
-                                            @break
-                                        @case('completion')
-                                            Đã hoàn thành khóa học <strong>{{ $activity->course_title }}</strong>
-                                            @break
-                                        @case('submission')
-                                            Đã nộp bài tập trong khóa học <strong>{{ $activity->course_title }}</strong>
-                                            @break
-                                        @case('comment')
-                                            Đã bình luận trong khóa học <strong>{{ $activity->course_title }}</strong>
-                                            @break
-                                        @default
-                                            Đã tương tác với khóa học <strong>{{ $activity->course_title }}</strong>
-                                    @endswitch
+                                    {{ $activity->title }}
+                                    @if($activity->course)
+                                    <strong>{{ $activity->course->title }}</strong>
+                                    @endif
                                 </p>
+                                @if($activity->description)
+                                <p class="text-muted small mb-0">{{ $activity->description }}</p>
+                                @endif
                             </div>
                         </div>
                     </div>

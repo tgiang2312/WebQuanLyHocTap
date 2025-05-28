@@ -16,7 +16,7 @@
                     <a href="#" class="text-decoration-none text-white">
                         <i class="bi bi-twitter-x fs-5"></i>
                     </a>
-                    <a href="#" class="text-decoration-none text-white">
+                    <a href="instagram.com" class="text-decoration-none text-white">
                         <i class="bi bi-instagram fs-5"></i>
                     </a>
                 </div>
@@ -63,7 +63,7 @@
                 <ul class="list-unstyled">
                     <li class="mb-3 d-flex">
                         <i class="bi bi-geo-alt text-light me-2"></i>
-                        <span class="text-light">123 Đường Nguyễn Văn Linh, Quận 7, TP.HCM</span>
+                        <span class="text-light">123 Đường XXX, Quận X, TP.Hồ Chí Minh</span>
                     </li>
                     <li class="mb-3 d-flex">
                         <i class="bi bi-telephone text-light me-2"></i>
