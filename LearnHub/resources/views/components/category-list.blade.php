@@ -51,7 +51,7 @@
             </a>
             @endforeach
             <a href="{{ route('courses.index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <div>
+<div>
                     <i class="bi bi-grid-3x3-gap text-secondary me-2"></i>
                     Tất cả khóa học
                 </div>
