@@ -3,8 +3,7 @@
         <div class="container">
             <!-- Logo -->
             <a class="navbar-brand d-flex align-items-center" href="{{ route('home') }}">
-                <i class="bi bi-book me-2 fs-4"></i>
-                <span class="fw-bold fs-4">LearnHub</span>
+                <img src="{{ asset('images/logo.jpg') }}" alt="LearnHub Logo" height="50" class="me-2">
             </a>
             
             <!-- Mobile Toggle Button -->

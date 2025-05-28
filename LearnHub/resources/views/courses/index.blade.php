@@ -79,8 +79,10 @@
                         @if ($course->image_data || $course->image)
                             <img src="{{ $course->imageUrl }}" class="card-img-top" alt="{{ $course->title }}" style="height: 200px; object-fit: cover;">
                         @else
-                            <div class="bg-light text-center py-5">
-                                <i class="bi bi-image text-secondary" style="font-size: 4rem;"></i>
+                            <div style="background-image: url('{{ asset('images/logo-background.png') }}'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 200px; background-color: #f8f9fa; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
+                                <div style="background-color: #0d6efd; color: white; padding: 8px 15px; border-radius: 8px; margin-bottom: 15px; max-width: 90%; text-align: center;">
+                                    <span style="font-weight: bold;">{{ $course->title }}</span>
+                                </div>
                             </div>
                         @endif
                         <div class="card-body">

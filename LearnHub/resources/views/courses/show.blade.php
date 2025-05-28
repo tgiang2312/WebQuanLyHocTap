@@ -216,9 +216,17 @@
                         @forelse($otherCourses as $otherCourse)
                             <div class="col-md-4">
                                 <div class="card h-100 border-0 shadow-sm course-card">
-                                    <img src="{{ $otherCourse->image ? asset('storage/' . $otherCourse->image) : asset('images/course-placeholder.jpg') }}" 
-                                         class="card-img-top" alt="{{ $otherCourse->title }}" 
-                                         style="height: 160px; object-fit: cover;">
+                                    @if($otherCourse->image_data || $otherCourse->image)
+                                        <img src="{{ $otherCourse->imageUrl }}" 
+                                             class="card-img-top" alt="{{ $otherCourse->title }}" 
+                                             style="height: 160px; object-fit: cover;">
+                                    @else
+                                        <div style="background-image: url('{{ asset('images/logo-background.png') }}'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 160px; background-color: #f8f9fa; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
+                                            <div style="background-color: #0d6efd; color: white; padding: 6px 12px; border-radius: 6px; margin-bottom: 12px; max-width: 90%; text-align: center;">
+                                                <span style="font-weight: bold; font-size: 0.9rem;">{{ $otherCourse->title }}</span>
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="card-body">
                                         <span class="badge bg-primary mb-2">{{ $otherCourse->category }}</span>
                                         <h5 class="card-title fw-semibold">{{ $otherCourse->title }}</h5>
