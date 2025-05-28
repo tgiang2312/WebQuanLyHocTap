@@ -14,6 +14,13 @@ class Enrollment extends Model
         'course_id',
         'status',
         'progress',
+        'completed',
+        'last_lesson_id',
+        'last_lesson_title',
+    ];
+
+    protected $casts = [
+        'completed' => 'boolean',
     ];
 
     // Relationship with user (student)
@@ -26,5 +33,18 @@ class Enrollment extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+    
+    // Relationship with completed lessons
+    public function completedLessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'completed_lessons', 'enrollment_id', 'lesson_id')
+                    ->withTimestamps();
+    }
+    
+    // Last viewed lesson
+    public function lastLesson()
+    {
+        return $this->belongsTo(Lesson::class, 'last_lesson_id');
     }
 } 

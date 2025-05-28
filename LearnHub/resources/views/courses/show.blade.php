@@ -29,7 +29,17 @@
                     </div>
                     <div class="d-flex align-items-center">
                         <i class="bi bi-bar-chart me-1 text-muted"></i>
-                        <span>{{ ucfirst(trans('app.' . $course->level)) }}</span>
+                        <span>
+                            @if($course->level == 'beginner')
+                                Cơ bản
+                            @elseif($course->level == 'intermediate')
+                                Trung cấp
+                            @elseif($course->level == 'advanced')
+                                Nâng cao
+                            @else
+                                {{ $course->level }}
+                            @endif
+                        </span>
                     </div>
                     <div class="d-flex align-items-center">
                         <i class="bi bi-calendar me-1 text-muted"></i>
@@ -55,8 +65,8 @@
                             <div class="mb-4">
                                 <h5 class="fw-semibold mb-3">Tiến độ khóa học</h5>
                                 <div class="progress mb-2" style="height: 10px;">
-                                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" 
-                                         role="progressbar" style="width: {{ $progress }}%" 
+                                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated course-progress-bar" 
+                                         role="progressbar" 
                                          aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                                 <p class="text-muted small">
@@ -255,4 +265,16 @@
         border-bottom: 2px solid #dee2e6;
     }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Đặt chiều rộng cho thanh tiến trình
+        const progressBar = document.querySelector('.course-progress-bar');
+        if (progressBar) {
+            progressBar.style.width = '{{ $progress }}%';
+        }
+    });
+</script>
 @endsection

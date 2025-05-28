@@ -13,109 +13,104 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             
-            <!-- Navigation Links -->
-            <div class="collapse navbar-collapse" id="navbarMain">
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
-                            Trang chủ
-                        </a>
+                        <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Trang chủ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('courses.*') ? 'active' : '' }}" href="{{ route('courses.index') }}">
-                            Khóa học
-                        </a>
+                        <a class="nav-link {{ request()->routeIs('courses.index') ? 'active' : '' }}" href="{{ route('courses.index') }}">Khóa học</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">
-                            Giới thiệu
-                        </a>
+                        <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">Giới thiệu</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">
-                            Liên hệ
-                        </a>
+                        <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Liên hệ</a>
                     </li>
                 </ul>
                 
-                <!-- Search Form -->
-                <form class="d-flex me-2">
-                    <div class="input-group">
-                        <span class="input-group-text bg-primary border-0 text-white">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input class="form-control bg-primary-subtle border-0 text-white" type="search" 
-                               placeholder="Tìm kiếm khóa học..." aria-label="Search">
-                    </div>
-                </form>
-                
-                <!-- User Menu -->
-                @auth
-                    <div class="d-flex align-items-center">
-                        <!-- Notifications -->
-                        <div class="dropdown me-3">
-                            <button class="btn btn-link text-white position-relative p-1" type="button" 
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-bell fs-5"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger rounded-circle">
-                                    <span class="visually-hidden">Thông báo mới</span>
-                                </span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow">
-                                <li><h6 class="dropdown-header">Thông báo</h6></li>
-                                <li><a class="dropdown-item" href="#">Bài giảng mới đã được thêm</a></li>
-                                <li><a class="dropdown-item" href="#">Bài tập sắp đến hạn</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#">Xem tất cả thông báo</a></li>
-                            </ul>
-                        </div>
+                <!-- Right Side Navigation -->
+                <ul class="navbar-nav ms-auto">
+                    @guest
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">Đăng nhập</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('register') }}">Đăng ký</a>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('students.dashboard') || request()->routeIs('teachers.dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+                            </a>
+                        </li>
                         
-                        <!-- User Dropdown -->
-                        <div class="dropdown">
-                            <button class="btn btn-link d-flex align-items-center text-white text-decoration-none dropdown-toggle" 
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center me-2" 
-                                     style="width: 32px; height: 32px;">
-                                    <span class="fw-medium small">NT</span>
-                                </div>
-                                <span class="d-none d-md-block">{{ Auth::user()->name }}</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                        @if(Auth::user()->role === 'teacher' || Auth::user()->role === 'admin')
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="teacherDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-workspace"></i> Giảng viên
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="teacherDropdown">
+                                    <li><a class="dropdown-item" href="{{ route('teachers.dashboard') }}">Bảng điều khiển</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('teachers.courses') }}">Quản lý khóa học</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('teachers.assignments') }}">Quản lý bài tập</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('teachers.analytics') }}">Báo cáo thống kê</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ route('courses.create') }}">Tạo khóa học mới</a></li>
+                                </ul>
+                            </li>
+                        @endif
+                        
+                        @if(Auth::user()->role === 'student' || Auth::user()->role === 'admin')
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="studentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-badge"></i> Học viên
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="studentDropdown">
+                                    <li><a class="dropdown-item" href="{{ route('students.dashboard') }}">Bảng điều khiển</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('students.courses') }}">Khóa học của tôi</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('students.assignments') }}">Bài tập</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('students.achievements') }}">Thành tích</a></li>
+                                </ul>
+                            </li>
+                        @endif
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('profile.show') }}">
-                                        <i class="bi bi-person me-2"></i> Hồ sơ cá nhân
-                                    </a>
+                                    <span class="dropdown-item-text text-muted small">
+                                        <strong>Vai trò:</strong> 
+                                        @if(Auth::user()->role === 'admin')
+                                            <span class="badge bg-danger">Quản trị viên</span>
+                                        @elseif(Auth::user()->role === 'teacher')
+                                            <span class="badge bg-primary">Giảng viên</span>
+                                        @else
+                                            <span class="badge bg-success">Học viên</span>
+                                        @endif
+                                    </span>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('dashboard') }}">
-                                        <i class="bi bi-book me-2"></i> Khóa học của tôi
-                                    </a>
-                                </li>
-                                @if(Auth::user()->isTeacher() || Auth::user()->isAdmin())
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('courses.create') }}">
-                                        <i class="bi bi-plus-circle me-2"></i> Tạo khóa học mới
-                                    </a>
-                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>Hồ sơ</a></li>
+                                @if(Auth::user()->role === 'admin')
+                                    <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bi bi-gear me-2"></i>Quản trị hệ thống</a></li>
                                 @endif
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                            <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
                                         </button>
                                     </form>
                                 </li>
                             </ul>
-                        </div>
-                    </div>
-                @else
-                    <div class="d-flex">
-                        <a href="{{ route('login') }}" class="btn btn-outline-light me-2">Đăng nhập</a>
-                        <a href="{{ route('register') }}" class="btn btn-light">Đăng ký</a>
-                    </div>
-                @endauth
+                        </li>
+                    @endguest
+                </ul>
             </div>
         </div>
     </nav>

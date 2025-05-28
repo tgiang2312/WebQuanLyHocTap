@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('comments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->morphs('commentable'); // Cho phép comment trên nhiều loại đối tượng (lessons, courses, v.v.)
-            $table->text('content');
-            $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade'); // Cho phép trả lời comment
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('comments')) {
+            Schema::create('comments', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->morphs('commentable'); // Cho phép comment trên nhiều loại đối tượng (lessons, courses, v.v.)
+                $table->text('content');
+                $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade'); // Cho phép trả lời comment
+                $table->timestamps();
+            });
+        }
     }
 
     /**

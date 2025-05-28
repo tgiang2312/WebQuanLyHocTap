@@ -13,9 +13,24 @@ return new class extends Migration
             $table->string('name');
             $table->string('username')->unique();
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'teacher', 'student'])->default('student');
+            $table->string('role')->default('student'); // student, teacher, admin
             $table->string('avatar')->nullable();
+            $table->text('bio')->nullable();
+            $table->string('phone')->nullable();
+            $table->date('birthday')->nullable();
+            
+            // Thông tin giảng viên
+            $table->string('title')->nullable(); // Chức danh
+            $table->string('expertise')->nullable(); // Chuyên môn
+            $table->text('experience')->nullable(); // Kinh nghiệm
+            
+            // Tùy chỉnh
+            $table->boolean('email_notifications')->default(true);
+            $table->string('language')->default('vi');
+            
+            $table->rememberToken();
             $table->timestamps();
         });
     }

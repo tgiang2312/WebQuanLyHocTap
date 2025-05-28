@@ -8,6 +8,11 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,72 +44,13 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Dashboard
 Route::get('/dashboard', function () {
-    // Dữ liệu mẫu cho khóa học đã đăng ký
-    $enrolledCourses = [
-        [
-            'id' => 1,
-            'title' => 'Lập trình PHP cơ bản',
-            'instructor' => 'Nguyễn Văn A',
-            'category' => 'Lập trình',
-            'progress' => 75,
-            'lastLesson' => 'Bài 8: Làm việc với Database',
-            'image' => 'images/courses/php.jpg',
-            'completed' => false
-        ],
-        [
-            'id' => 2,
-            'title' => 'JavaScript nâng cao',
-            'instructor' => 'Trần Thị B',
-            'category' => 'Web',
-            'progress' => 40,
-            'lastLesson' => 'Bài 4: Promises và Async/Await',
-            'image' => 'images/courses/js.jpg',
-            'completed' => false
-        ],
-        [
-            'id' => 3,
-            'title' => 'HTML & CSS cơ bản',
-            'instructor' => 'Lê Văn C',
-            'category' => 'Web',
-            'progress' => 100,
-            'lastLesson' => 'Bài 10: Responsive Design',
-            'image' => 'images/courses/html.jpg',
-            'completed' => true
-        ]
-    ];
-    
-    // Dữ liệu mẫu cho bài tập sắp đến hạn
-    $upcomingAssignments = [
-        [
-            'id' => 1,
-            'title' => 'Xây dựng trang web portfolio',
-            'course' => 'HTML & CSS cơ bản',
-            'dueDate' => now()->addDays(3)
-        ],
-        [
-            'id' => 2,
-            'title' => 'Tạo ứng dụng Todo List',
-            'course' => 'JavaScript nâng cao',
-            'dueDate' => now()->addDays(5)
-        ]
-    ];
-    
-    // Dữ liệu mẫu cho thành tích
-    $achievements = [
-        [
-            'icon' => '🏆',
-            'title' => 'Hoàn thành khóa học đầu tiên',
-            'date' => now()->subDays(10)
-        ],
-        [
-            'icon' => '⭐',
-            'title' => 'Nộp 5 bài tập đúng hạn',
-            'date' => now()->subDays(5)
-        ]
-    ];
-    
-    return view('dashboard', compact('enrolledCourses', 'upcomingAssignments', 'achievements'));
-})->middleware('auth')->name('dashboard');
+    $user = Auth::user();
+    if ($user && ($user->role === 'teacher' || $user->role === 'admin')) {
+        return redirect()->route('teachers.dashboard');
+    } else {
+        return redirect()->route('students.dashboard');
+    }
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 // Dashboard related routes
 Route::get('/dashboard/courses', function() {
@@ -244,9 +190,12 @@ Route::get('auth/{provider}', [LoginController::class, 'redirectToProvider']);
 Route::get('auth/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
 
 // Profile routes
-Route::get('/profile', function () {
-    return view('profile');
-})->middleware('auth')->name('profile.show');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
@@ -261,4 +210,23 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/courses', function () {
         return view('admin.courses');
     })->name('admin.courses');
+});
+
+// Student Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/student/dashboard', [StudentController::class, 'dashboard'])->name('students.dashboard');
+    Route::get('/student/courses', [StudentController::class, 'courses'])->name('students.courses');
+    Route::get('/student/assignments', [StudentController::class, 'assignments'])->name('students.assignments');
+    Route::get('/student/achievements', [StudentController::class, 'achievements'])->name('students.achievements');
+});
+
+// Teacher Routes
+Route::middleware(['auth', 'verified', 'teacher'])->group(function () {
+    Route::get('/teacher/dashboard', [TeacherController::class, 'dashboard'])->name('teachers.dashboard');
+    Route::get('/teacher/courses', [TeacherController::class, 'courses'])->name('teachers.courses');
+    Route::get('/teacher/assignments', [TeacherController::class, 'assignments'])->name('teachers.assignments');
+    Route::get('/teacher/assignments/create', [TeacherController::class, 'createAssignment'])->name('teachers.assignments.create');
+    Route::post('/teacher/assignments', [TeacherController::class, 'storeAssignment'])->name('teachers.assignments.store');
+    Route::get('/teacher/analytics', [TeacherController::class, 'analytics'])->name('teachers.analytics');
+    Route::get('/teacher/activities', [TeacherController::class, 'activities'])->name('teachers.activities');
 });

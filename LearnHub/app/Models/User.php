@@ -24,6 +24,14 @@ class User extends Authenticatable
         'password',
         'role',
         'avatar',
+        'bio',
+        'phone',
+        'birthday',
+        'title',
+        'expertise',
+        'experience',
+        'email_notifications',
+        'language',
     ];
 
     /**
@@ -94,5 +102,57 @@ class User extends Authenticatable
     public function isStudent()
     {
         return $this->role === 'student';
+    }
+
+    /**
+     * Lấy số khóa học đã tạo (cho giảng viên)
+     */
+    public function getCoursesCountAttribute()
+    {
+        if ($this->role !== 'teacher') {
+            return 0;
+        }
+        
+        return $this->teachingCourses()->count();
+    }
+
+    /**
+     * Lấy số khóa học đã đăng ký (cho học viên)
+     */
+    public function getEnrollmentsCountAttribute()
+    {
+        if ($this->role !== 'student') {
+            return 0;
+        }
+        
+        return $this->enrollments()->count();
+    }
+
+    /**
+     * Lấy số khóa học đã hoàn thành (cho học viên)
+     */
+    public function getCompletedCoursesCountAttribute()
+    {
+        if ($this->role !== 'student') {
+            return 0;
+        }
+        
+        return $this->enrollments()->where('completed', true)->count();
+    }
+
+    /**
+     * Lấy số thành tích đã đạt được (cho học viên)
+     */
+    public function getAchievementsCountAttribute()
+    {
+        return $this->achievements()->count();
+    }
+
+    /**
+     * Các thành tích của người dùng
+     */
+    public function achievements()
+    {
+        return $this->hasMany(Achievement::class);
     }
 }

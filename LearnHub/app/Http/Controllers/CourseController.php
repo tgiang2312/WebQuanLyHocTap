@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,7 @@ class CourseController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->isTeacher() && !Auth::user()->isAdmin()) {
+        if (!(Auth::user()->role === 'teacher' || Auth::user()->role === 'admin')) {
             return redirect()->route('courses.index')->with('error', 'Bạn không có quyền tạo khóa học');
         }
         
@@ -36,7 +37,7 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->isTeacher() && !Auth::user()->isAdmin()) {
+        if (!(Auth::user()->role === 'teacher' || Auth::user()->role === 'admin')) {
             return redirect()->route('courses.index')->with('error', 'Bạn không có quyền tạo khóa học');
         }
 
@@ -91,10 +92,13 @@ class CourseController extends Controller
         // Kiểm tra nếu người dùng đã đăng nhập
         if (Auth::check()) {
             // Kiểm tra xem người dùng đã đăng ký khóa học này chưa
-            $enrollment = Auth::user()->enrolledCourses()->where('course_id', $course->id)->first();
+            $enrollment = Enrollment::where('user_id', Auth::id())
+                ->where('course_id', $course->id)
+                ->first();
+                
             if ($enrollment) {
                 $isEnrolled = true;
-                $progress = $enrollment->pivot->progress ?? 0;
+                $progress = $enrollment->progress ?? 0;
             }
         }
         
@@ -106,7 +110,7 @@ class CourseController extends Controller
      */
     public function edit(Course $course)
     {
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền chỉnh sửa khóa học này');
         }
         
@@ -118,7 +122,7 @@ class CourseController extends Controller
      */
     public function update(Request $request, Course $course)
     {
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền chỉnh sửa khóa học này');
         }
 
@@ -165,7 +169,7 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền xóa khóa học này');
         }
 
@@ -184,7 +188,7 @@ class CourseController extends Controller
      */
     public function myCourses()
     {
-        if (!Auth::user()->isTeacher()) {
+        if (Auth::user()->role !== 'teacher') {
             return redirect()->route('courses.index');
         }
         
@@ -208,5 +212,50 @@ class CourseController extends Controller
             'courses' => $courses,
             'category' => ucwords($categoryName)
         ]);
+    }
+    
+    /**
+     * Display the learning interface for a course.
+     */
+    public function learn(Course $course)
+    {
+        // Kiểm tra xem người dùng đã đăng ký khóa học này chưa
+        $enrollment = Enrollment::where('user_id', Auth::id())
+            ->where('course_id', $course->id)
+            ->first();
+        
+        if (!$enrollment && Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
+            return redirect()->route('courses.show', $course)
+                ->with('error', 'Bạn cần đăng ký khóa học này trước khi học.');
+        }
+        
+        // Lấy tất cả bài học của khóa học, sắp xếp theo thứ tự
+        $lessons = $course->lessons()->orderBy('order_number', 'asc')->get();
+        
+        if ($lessons->isEmpty()) {
+            return redirect()->route('courses.show', $course)
+                ->with('info', 'Khóa học này chưa có bài học nào.');
+        }
+        
+        // Xác định bài học hiện tại
+        $currentLesson = null;
+        
+        // Nếu người dùng đã đăng ký, lấy bài học cuối cùng họ đã học
+        if ($enrollment && $enrollment->pivot->last_lesson_id) {
+            $currentLesson = $course->lessons()->find($enrollment->pivot->last_lesson_id);
+        }
+        
+        // Nếu không có bài học cuối cùng, lấy bài học đầu tiên
+        if (!$currentLesson && $lessons->isNotEmpty()) {
+            $currentLesson = $lessons->first();
+        }
+        
+        // Tính toán tiến độ
+        $progress = 0;
+        if ($enrollment) {
+            $progress = $enrollment->pivot->progress ?? 0;
+        }
+        
+        return view('courses.learn', compact('course', 'lessons', 'currentLesson', 'progress'));
     }
 } 
