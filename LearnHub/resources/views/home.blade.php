@@ -3,21 +3,22 @@
 @section('title', 'Trang chủ - LearnHub')
 
 @section('content')
-<div class="hero-section position-relative bg-light">
-    <div class="container py-5">
+<div class="hero-section position-relative">
+    <div class="hero-image-container">
+        <img src="{{ asset('images/home.jpg') }}" alt="LearnHub Background" class="hero-image w-100">
+        <div class="hero-overlay"></div>
+    </div>
+    <div class="container position-relative py-5">
         <div class="row align-items-center py-5">
-            <div class="col-lg-6 py-4">
-                <h1 class="display-5 fw-bold mb-4">Chào mừng đến với <span class="text-primary">LearnHub</span></h1>
-                <p class="lead mb-4">Nền tảng học tập trực tuyến giúp bạn phát triển kỹ năng và kiến thức một cách hiệu quả.</p>
+            <div class="col-lg-8 py-4">
+                <h1 class="display-5 fw-bold mb-4 text-white">Chào mừng đến với <span class="text-primary">LearnHub</span></h1>
+                <p class="lead mb-4 text-white">Nền tảng học tập trực tuyến giúp bạn phát triển kỹ năng và kiến thức một cách hiệu quả.</p>
                 <div class="d-flex gap-3">
                     <a href="{{ route('courses.index') }}" class="btn btn-primary btn-lg">Khám phá khóa học</a>
                     @guest
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-lg">Đăng nhập</a>
+                        <a href="{{ route('login') }}" class="btn btn-light btn-lg">Đăng nhập</a>
                     @endguest
                 </div>
-            </div>
-            <div class="col-lg-6 d-none d-lg-block">
-                <img src="{{ asset('images/hero-image.svg') }}" alt="LearnHub" class="img-fluid">
             </div>
         </div>
     </div>
@@ -209,6 +210,61 @@
         </div>
     </div>
     
+    <!-- Gallery section -->
+    <div class="py-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Hình ảnh hoạt động</h2>
+            <p class="lead text-muted">Các hoạt động và sự kiện học tập tại LearnHub</p>
+        </div>
+        
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 hover-card overflow-hidden">
+                    <img src="{{ asset('images/gallery1.jpg') }}" class="card-img" alt="Workshop học tập" style="height: 250px; object-fit: cover;">
+                    <div class="card-img-overlay d-flex align-items-end bg-dark bg-opacity-25">
+                        <h5 class="card-title text-white mb-0 fw-bold">Workshop lập trình</h5>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 hover-card overflow-hidden">
+                    <img src="{{ asset('images/gallery2.jpg') }}" class="card-img" alt="Seminar chuyên đề" style="height: 250px; object-fit: cover;">
+                    <div class="card-img-overlay d-flex align-items-end bg-dark bg-opacity-25">
+                        <h5 class="card-title text-white mb-0 fw-bold">Seminar chuyên đề</h5>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 hover-card overflow-hidden">
+                    <img src="{{ asset('images/gallery3.jpg') }}" class="card-img" alt="Học nhóm" style="height: 250px; object-fit: cover;">
+                    <div class="card-img-overlay d-flex align-items-end bg-dark bg-opacity-25">
+                        <h5 class="card-title text-white mb-0 fw-bold">Hoạt động học nhóm</h5>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100 hover-card overflow-hidden">
+                    <img src="{{ asset('images/gallery4.jpg') }}" class="card-img" alt="Lớp học trực tuyến" style="height: 250px; object-fit: cover;">
+                    <div class="card-img-overlay d-flex align-items-end bg-dark bg-opacity-25">
+                        <h5 class="card-title text-white mb-0 fw-bold">Lớp học trực tuyến</h5>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100 hover-card overflow-hidden">
+                    <img src="{{ asset('images/gallery5.jpg') }}" class="card-img" alt="Giảng viên" style="height: 250px; object-fit: cover;">
+                    <div class="card-img-overlay d-flex align-items-end bg-dark bg-opacity-25">
+                        <h5 class="card-title text-white mb-0 fw-bold">Đội ngũ giảng viên</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- CTA section -->
     <div class="bg-primary bg-opacity-10 p-5 rounded-3 text-center my-5">
         <h2 class="fw-bold mb-3">Sẵn sàng bắt đầu hành trình học tập của bạn?</h2>
@@ -280,6 +336,44 @@
     
     .bg-primary-subtle {
         background-color: rgba(13, 110, 253, 0.2);
+    }
+    
+    /* Hero section styles */
+    .hero-section {
+        position: relative;
+        height: 600px;
+        overflow: hidden;
+    }
+    
+    .hero-image-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+    
+    .hero-section .container {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        display: flex;
+        align-items: center;
     }
 </style>
 @endsection
