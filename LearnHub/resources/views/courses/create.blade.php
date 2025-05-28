@@ -89,6 +89,18 @@
                             </div>
                         </div>
                         
+                        <div class="mb-4">
+                            <label for="status" class="form-label fw-semibold">Trạng thái <span class="text-danger">*</span></label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>Bản nháp</option>
+                                <option value="published" {{ old('status') == 'published' ? 'selected' : '' }}>Xuất bản</option>
+                            </select>
+                            <div class="form-text">
+                                Bản nháp: Khóa học chỉ hiển thị với bạn và quản trị viên<br>
+                                Xuất bản: Khóa học hiển thị với tất cả người dùng
+                            </div>
+                        </div>
+                        
                         <div class="alert alert-info mb-4">
                             <div class="d-flex">
                                 <i class="bi bi-info-circle-fill me-2 fs-5"></i>

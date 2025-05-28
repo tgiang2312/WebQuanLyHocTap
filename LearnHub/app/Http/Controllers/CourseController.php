@@ -6,6 +6,7 @@ use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CourseController extends Controller
 {
@@ -47,14 +48,26 @@ class CourseController extends Controller
             'status' => 'required|in:draft,published',
             'sessions' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
-            'thumbnail' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('course-thumbnails', 'public');
-            $validated['thumbnail'] = $path;
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('images/courses', 'public');
+            $validated['image'] = $path;
         }
 
+        // Tạo slug từ title
+        $baseSlug = Str::slug($validated['title']);
+        $slug = $baseSlug;
+        
+        // Kiểm tra và đảm bảo slug là duy nhất
+        $count = 1;
+        while (Course::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $count;
+            $count++;
+        }
+        
+        $validated['slug'] = $slug;
         $validated['teacher_id'] = Auth::id();
 
         $course = Course::create($validated);
@@ -71,7 +84,21 @@ class CourseController extends Controller
             $query->orderBy('order_number', 'asc');
         }]);
         
-        return view('courses.show', compact('course'));
+        // Khởi tạo biến mặc định
+        $isEnrolled = false;
+        $progress = 0;
+        
+        // Kiểm tra nếu người dùng đã đăng nhập
+        if (Auth::check()) {
+            // Kiểm tra xem người dùng đã đăng ký khóa học này chưa
+            $enrollment = Auth::user()->enrolledCourses()->where('course_id', $course->id)->first();
+            if ($enrollment) {
+                $isEnrolled = true;
+                $progress = $enrollment->pivot->progress ?? 0;
+            }
+        }
+        
+        return view('courses.show', compact('course', 'isEnrolled', 'progress'));
     }
 
     /**
@@ -103,19 +130,31 @@ class CourseController extends Controller
             'status' => 'required|in:draft,published',
             'sessions' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
-            'thumbnail' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        if ($request->hasFile('thumbnail')) {
-            // Delete old thumbnail if exists
-            if ($course->thumbnail) {
-                Storage::disk('public')->delete($course->thumbnail);
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($course->image) {
+                Storage::disk('public')->delete($course->image);
             }
             
-            $path = $request->file('thumbnail')->store('course-thumbnails', 'public');
-            $validated['thumbnail'] = $path;
+            $path = $request->file('image')->store('images/courses', 'public');
+            $validated['image'] = $path;
         }
 
+        // Cập nhật slug từ title
+        $baseSlug = Str::slug($validated['title']);
+        $slug = $baseSlug;
+        
+        // Kiểm tra và đảm bảo slug là duy nhất (bỏ qua chính khóa học hiện tại)
+        $count = 1;
+        while (Course::where('slug', $slug)->where('id', '!=', $course->id)->exists()) {
+            $slug = $baseSlug . '-' . $count;
+            $count++;
+        }
+        
+        $validated['slug'] = $slug;
         $course->update($validated);
         
         return redirect()->route('courses.show', $course)->with('success', 'Khóa học đã được cập nhật thành công');
@@ -130,9 +169,9 @@ class CourseController extends Controller
             return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền xóa khóa học này');
         }
 
-        // Delete thumbnail if exists
-        if ($course->thumbnail) {
-            Storage::disk('public')->delete($course->thumbnail);
+        // Delete image if exists
+        if ($course->image) {
+            Storage::disk('public')->delete($course->image);
         }
         
         $course->delete();
