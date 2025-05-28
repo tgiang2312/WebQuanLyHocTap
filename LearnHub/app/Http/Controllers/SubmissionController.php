@@ -27,7 +27,12 @@ class SubmissionController extends Controller
         // Kiểm tra xem người dùng đã nộp bài chưa
         $submission = $assignment->submissions()->where('user_id', Auth::id())->first();
         
-        return view('assignments.show', compact('assignment', 'submission'));
+        // Nếu là bài tập dạng form, chuyển hướng đến trang hiển thị form
+        if ($assignment->is_form) {
+            return redirect()->route('assignments.show', $assignment);
+        }
+        
+        return view('submissions.create', compact('assignment', 'submission'));
     }
     
     /**

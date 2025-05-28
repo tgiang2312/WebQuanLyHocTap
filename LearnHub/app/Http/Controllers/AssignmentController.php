@@ -123,30 +123,38 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
-        $lesson = $assignment->lesson;
-        $course = $lesson->course;
+        // Kiểm tra xem người dùng có quyền xem bài tập này không
+        $course = $assignment->course;
+        $canView = false;
         
-        // Check if user is enrolled or is the teacher
-        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
-            $isEnrolled = $course->students()->where('user_id', Auth::id())->exists();
-            
-            if (!$isEnrolled) {
-                return redirect()->route('courses.show', $course)
-                    ->with('error', 'Bạn cần đăng ký khóa học để xem bài tập này');
+        if (Auth::check()) {
+            // Giáo viên hoặc admin có thể xem mọi bài tập
+            if (Auth::id() === $course->teacher_id || Auth::user()->role === 'admin') {
+                $canView = true;
+            } 
+            // Học viên chỉ có thể xem bài tập nếu đã đăng ký khóa học
+            else {
+                $canView = $course->enrollments()->where('user_id', Auth::id())->exists();
             }
         }
         
-        // Get user's submission if exists
-        $userSubmission = null;
-        if (Auth::check()) {
-            $userSubmission = $assignment->submissions()
-                ->where('user_id', Auth::id())
-                ->first();
+        if (!$canView) {
+            return redirect()->route('courses.show', $course)
+                ->with('error', 'Bạn không có quyền xem bài tập này.');
         }
         
-        $assignment->load('lesson.course');
+        // Kiểm tra xem người dùng đã nộp bài chưa
+        $submission = null;
+        if (Auth::check()) {
+            $submission = $assignment->submissions()->where('user_id', Auth::id())->first();
+        }
         
-        return view('assignments.show', compact('assignment', 'userSubmission'));
+        // Nếu là bài tập dạng form, sử dụng view form_show
+        if ($assignment->is_form) {
+            return view('assignments.form_show', compact('assignment', 'submission'));
+        }
+        
+        return view('assignments.show', compact('assignment', 'submission'));
     }
 
     /**

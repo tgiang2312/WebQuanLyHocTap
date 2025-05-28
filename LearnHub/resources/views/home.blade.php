@@ -21,6 +21,16 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Search Bar -->
+        <div class="row mt-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow p-4">
+                    <h4 class="fw-bold mb-3">Tìm kiếm khóa học</h4>
+                    <x-course-search :expand-search="true" :show-filters="false" />
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

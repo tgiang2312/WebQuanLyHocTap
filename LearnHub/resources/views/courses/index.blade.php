@@ -25,32 +25,7 @@
         <div class="col-lg-8 mx-auto">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <form action="{{ route('courses.index') }}" method="GET" class="row g-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Tìm kiếm khóa học..." name="search" value="{{ request('search') }}">
-                                <button class="btn btn-primary" type="submit">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <select name="category" class="form-select">
-                                <option value="">Tất cả danh mục</option>
-                                <option value="lap-trinh" {{ request('category') == 'lap-trinh' ? 'selected' : '' }}>Lập trình</option>
-                                <option value="marketing" {{ request('category') == 'marketing' ? 'selected' : '' }}>Marketing</option>
-                                <option value="thiet-ke" {{ request('category') == 'thiet-ke' ? 'selected' : '' }}>Thiết kế</option>
-                                <option value="kinh-doanh" {{ request('category') == 'kinh-doanh' ? 'selected' : '' }}>Kinh doanh</option>
-                                <option value="ngoai-ngu" {{ request('category') == 'ngoai-ngu' ? 'selected' : '' }}>Ngoại ngữ</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select name="sort" class="form-select">
-                                <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Mới nhất</option>
-                                <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>Phổ biến</option>
-                            </select>
-                        </div>
-                    </form>
+                    <x-course-search :filters="['category', 'sort']" :show-advanced="true" />
                 </div>
             </div>
         </div>

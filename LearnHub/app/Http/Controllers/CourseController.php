@@ -15,9 +15,39 @@ class CourseController extends Controller
     /**
      * Display a listing of the courses.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::where('status', 'published')->with('teacher')->get();
+        $query = Course::where('status', 'published')->with('teacher');
+        
+        // Tìm kiếm theo từ khóa
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Lọc theo danh mục
+        if ($request->has('category') && !empty($request->category)) {
+            $categorySlug = $request->category;
+            $categories = CategoryHelper::getCategories();
+            $categoryName = $categories[$categorySlug] ?? ucwords(str_replace('-', ' ', $categorySlug));
+            $query->where('category', $categoryName);
+        }
+        
+        // Sắp xếp kết quả
+        if ($request->has('sort') && !empty($request->sort)) {
+            if ($request->sort == 'newest') {
+                $query->orderBy('created_at', 'desc');
+            } elseif ($request->sort == 'popular') {
+                $query->withCount('students')->orderBy('students_count', 'desc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+        
+        $courses = $query->get();
         return view('courses.index', compact('courses'));
     }
 
@@ -304,5 +334,53 @@ class CourseController extends Controller
         }
         
         return view('courses.learn', compact('course', 'lessons', 'currentLesson', 'progress'));
+    }
+
+    /**
+     * Search courses by term.
+     */
+    public function search(Request $request)
+    {
+        $searchTerm = $request->search;
+        $query = Course::where('status', 'published')->with('teacher');
+        
+        // Tìm kiếm theo từ khóa
+        if (!empty($searchTerm)) {
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Lọc theo danh mục
+        if ($request->has('category') && !empty($request->category)) {
+            $categorySlug = $request->category;
+            $categories = CategoryHelper::getCategories();
+            $categoryName = $categories[$categorySlug] ?? ucwords(str_replace('-', ' ', $categorySlug));
+            $query->where('category', $categoryName);
+        }
+        
+        // Lọc theo cấp độ
+        if ($request->has('level') && !empty($request->level)) {
+            $query->where('level', $request->level);
+        }
+        
+        // Sắp xếp kết quả
+        if ($request->has('sort') && !empty($request->sort)) {
+            if ($request->sort == 'newest') {
+                $query->orderBy('created_at', 'desc');
+            } elseif ($request->sort == 'popular') {
+                $query->withCount('students')->orderBy('students_count', 'desc');
+            } elseif ($request->sort == 'price_asc') {
+                $query->orderBy('price', 'asc');
+            } elseif ($request->sort == 'price_desc') {
+                $query->orderBy('price', 'desc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+        
+        $courses = $query->get();
+        return view('courses.search', compact('courses', 'searchTerm'));
     }
 } 
