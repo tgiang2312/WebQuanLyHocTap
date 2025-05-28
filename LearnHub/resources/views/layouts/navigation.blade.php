@@ -40,11 +40,13 @@
                             <a class="nav-link" href="{{ route('register') }}">Đăng ký</a>
                         </li>
                     @else
+                        @if(Auth::user()->role === 'admin')
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('students.dashboard') || request()->routeIs('teachers.dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+                            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                                <i class="bi bi-graph-up"></i> Thống kê người dùng
                             </a>
                         </li>
+                        @endif
                         
                         @if(Auth::user()->role === 'teacher' || Auth::user()->role === 'admin')
                             <li class="nav-item dropdown">
