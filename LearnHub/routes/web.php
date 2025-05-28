@@ -106,25 +106,101 @@ Route::get('/dashboard', function () {
     return view('dashboard', compact('enrolledCourses', 'upcomingAssignments', 'achievements'));
 })->middleware('auth')->name('dashboard');
 
+// Dashboard related routes
+Route::get('/dashboard/courses', function() {
+    // Giữ nguyên logic dữ liệu mẫu từ dashboard
+    $enrolledCourses = [
+        [
+            'id' => 1,
+            'title' => 'Lập trình PHP cơ bản',
+            'instructor' => 'Nguyễn Văn A',
+            'category' => 'Lập trình',
+            'progress' => 75,
+            'lastLesson' => 'Bài 8: Làm việc với Database',
+            'image' => 'images/courses/php.jpg',
+            'completed' => false
+        ],
+        [
+            'id' => 2,
+            'title' => 'JavaScript nâng cao',
+            'instructor' => 'Trần Thị B',
+            'category' => 'Web',
+            'progress' => 40,
+            'lastLesson' => 'Bài 4: Promises và Async/Await',
+            'image' => 'images/courses/js.jpg',
+            'completed' => false
+        ],
+        [
+            'id' => 3,
+            'title' => 'HTML & CSS cơ bản',
+            'instructor' => 'Lê Văn C',
+            'category' => 'Web',
+            'progress' => 100,
+            'lastLesson' => 'Bài 10: Responsive Design',
+            'image' => 'images/courses/html.jpg',
+            'completed' => true
+        ]
+    ];
+    
+    return view('dashboard.courses', compact('enrolledCourses'));
+})->middleware('auth')->name('dashboard.courses');
+
+Route::get('/assignments', function() {
+    $assignments = [
+        [
+            'id' => 1,
+            'title' => 'Xây dựng trang web portfolio',
+            'course' => 'HTML & CSS cơ bản',
+            'dueDate' => now()->addDays(3)
+        ],
+        [
+            'id' => 2,
+            'title' => 'Tạo ứng dụng Todo List',
+            'course' => 'JavaScript nâng cao',
+            'dueDate' => now()->addDays(5)
+        ]
+    ];
+    
+    return view('assignments.index', compact('assignments'));
+})->middleware('auth')->name('assignments.index');
+
+Route::get('/achievements', function() {
+    $achievements = [
+        [
+            'icon' => '🏆',
+            'title' => 'Hoàn thành khóa học đầu tiên',
+            'date' => now()->subDays(10)
+        ],
+        [
+            'icon' => '⭐',
+            'title' => 'Nộp 5 bài tập đúng hạn',
+            'date' => now()->subDays(5)
+        ]
+    ];
+    
+    return view('achievements.index', compact('achievements'));
+})->middleware('auth')->name('achievements.index');
+
 // Course routes
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-Route::get('/courses/create', [CourseController::class, 'create'])->middleware('auth')->name('courses.create');
-Route::post('/courses', [CourseController::class, 'store'])->middleware('auth')->name('courses.store');
+Route::get('/courses/create', [CourseController::class, 'create'])->middleware(['auth', 'role:teacher,admin'])->name('courses.create');
+Route::post('/courses', [CourseController::class, 'store'])->middleware(['auth', 'role:teacher,admin'])->name('courses.store');
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
-Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->middleware('auth')->name('courses.edit');
-Route::put('/courses/{course}', [CourseController::class, 'update'])->middleware('auth')->name('courses.update');
-Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->middleware('auth')->name('courses.destroy');
+Route::get('/courses/{course}/learn', [CourseController::class, 'learn'])->middleware('auth')->name('courses.learn');
+Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->middleware(['auth'])->name('courses.edit');
+Route::put('/courses/{course}', [CourseController::class, 'update'])->middleware(['auth'])->name('courses.update');
+Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->middleware(['auth'])->name('courses.destroy');
 Route::get('/my-courses', [CourseController::class, 'myCourses'])->middleware('auth')->name('courses.my');
 Route::get('/courses/category/{category}', [CourseController::class, 'category'])->name('courses.category');
 
 // Lesson routes
-Route::get('/courses/{course}/lessons/create', [LessonController::class, 'create'])->middleware('auth')->name('lessons.create');
-Route::post('/courses/{course}/lessons', [LessonController::class, 'store'])->middleware('auth')->name('lessons.store');
-Route::get('/lessons/{lesson}', [LessonController::class, 'show'])->name('lessons.show');
+Route::get('/courses/{course}/lessons/create', [LessonController::class, 'create'])->middleware(['auth', 'role:teacher,admin'])->name('lessons.create');
+Route::post('/courses/{course}/lessons', [LessonController::class, 'store'])->middleware(['auth', 'role:teacher,admin'])->name('lessons.store');
+Route::get('/lessons/{lesson}', [LessonController::class, 'show'])->middleware('auth')->name('lessons.show');
 Route::get('/lessons/{lesson}/edit', [LessonController::class, 'edit'])->middleware('auth')->name('lessons.edit');
 Route::put('/lessons/{lesson}', [LessonController::class, 'update'])->middleware('auth')->name('lessons.update');
 Route::delete('/lessons/{lesson}', [LessonController::class, 'destroy'])->middleware('auth')->name('lessons.destroy');
-Route::post('/courses/{course}/lessons/reorder', [LessonController::class, 'reorder'])->middleware('auth')->name('lessons.reorder');
+Route::post('/courses/{course}/lessons/reorder', [LessonController::class, 'reorder'])->middleware(['auth', 'role:teacher,admin'])->name('lessons.reorder');
 
 // Enrollment routes
 Route::get('/enrollments', [EnrollmentController::class, 'index'])->middleware('auth')->name('enrollments.index');
@@ -134,19 +210,19 @@ Route::delete('/courses/{course}/drop', [EnrollmentController::class, 'destroy']
 Route::get('/courses/{course}/students', [EnrollmentController::class, 'students'])->middleware('auth')->name('enrollments.students');
 
 // Assignment routes
-Route::get('/lessons/{lesson}/assignments/create', [AssignmentController::class, 'create'])->middleware('auth')->name('assignments.create');
-Route::post('/lessons/{lesson}/assignments', [AssignmentController::class, 'store'])->middleware('auth')->name('assignments.store');
-Route::get('/assignments/{assignment}', [AssignmentController::class, 'show'])->name('assignments.show');
-Route::get('/assignments/{assignment}/edit', [AssignmentController::class, 'edit'])->middleware('auth')->name('assignments.edit');
-Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->middleware('auth')->name('assignments.update');
-Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->middleware('auth')->name('assignments.destroy');
-Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->middleware('auth')->name('assignments.submissions');
+Route::get('/lessons/{lesson}/assignments/create', [AssignmentController::class, 'create'])->middleware(['auth', 'role:teacher,admin'])->name('assignments.create');
+Route::post('/lessons/{lesson}/assignments', [AssignmentController::class, 'store'])->middleware(['auth', 'role:teacher,admin'])->name('assignments.store');
+Route::get('/assignments/{assignment}', [AssignmentController::class, 'show'])->middleware('auth')->name('assignments.show');
+Route::get('/assignments/{assignment}/edit', [AssignmentController::class, 'edit'])->middleware(['auth', 'role:teacher,admin'])->name('assignments.edit');
+Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->middleware(['auth', 'role:teacher,admin'])->name('assignments.update');
+Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->middleware(['auth', 'role:teacher,admin'])->name('assignments.destroy');
+Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->middleware(['auth', 'role:teacher,admin'])->name('assignments.submissions');
 
 // Submission routes
-Route::get('/assignments/{assignment}/submit', [SubmissionController::class, 'create'])->middleware('auth')->name('submissions.create');
-Route::post('/assignments/{assignment}/submit', [SubmissionController::class, 'store'])->middleware('auth')->name('submissions.store');
+Route::get('/assignments/{assignment}/submit', [SubmissionController::class, 'create'])->middleware(['auth', 'role:student'])->name('submissions.create');
+Route::post('/assignments/{assignment}/submit', [SubmissionController::class, 'store'])->middleware(['auth', 'role:student'])->name('submissions.store');
 Route::get('/submissions/{submission}', [SubmissionController::class, 'show'])->middleware('auth')->name('submissions.show');
-Route::post('/submissions/{submission}/grade', [SubmissionController::class, 'grade'])->middleware('auth')->name('submissions.grade');
+Route::post('/submissions/{submission}/grade', [SubmissionController::class, 'grade'])->middleware(['auth', 'role:teacher,admin'])->name('submissions.grade');
 Route::get('/submissions/{submission}/download', [SubmissionController::class, 'download'])->middleware('auth')->name('submissions.download');
 
 // Comment routes
@@ -171,3 +247,18 @@ Route::get('auth/{provider}/callback', [LoginController::class, 'handleProviderC
 Route::get('/profile', function () {
     return view('profile');
 })->middleware('auth')->name('profile.show');
+
+// Admin routes
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+    
+    Route::get('/users', function () {
+        return view('admin.users');
+    })->name('admin.users');
+    
+    Route::get('/courses', function () {
+        return view('admin.courses');
+    })->name('admin.courses');
+});

@@ -24,7 +24,7 @@
                         </div>
                         <div>
                             <h5 class="fw-semibold">Địa chỉ</h5>
-                            <p class="text-muted mb-0">Tòa nhà XXX, 123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
+                            <p class="text-muted mb-0">Tòa nhà XXX, 123 Đường Xxx, Quận x, TP. Hồ Chí Minh</p>
                         </div>
                     </div>
                     
@@ -45,7 +45,7 @@
                         </div>
                         <div>
                             <h5 class="fw-semibold">Điện thoại</h5>
-                            <p class="text-muted mb-0">(+84) 28 3456 7890</p>
+                            <p class="text-muted mb-0">(+84) 123 456 789</p>
                             <p class="text-muted mb-0">Hotline: 1800 1234</p>
                         </div>
                     </div>

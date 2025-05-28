@@ -91,6 +91,13 @@
                                         <i class="bi bi-book me-2"></i> Khóa học của tôi
                                     </a>
                                 </li>
+                                @if(Auth::user()->isTeacher() || Auth::user()->isAdmin())
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('courses.create') }}">
+                                        <i class="bi bi-plus-circle me-2"></i> Tạo khóa học mới
+                                    </a>
+                                </li>
+                                @endif
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">

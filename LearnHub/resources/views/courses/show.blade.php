@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $course['title'] . ' - LearnHub')
+@section('title', $course->title . ' - LearnHub')
 
 @section('content')
 <div class="container py-5">
@@ -8,41 +8,42 @@
     <div class="bg-light rounded-3 p-4 p-md-5 mb-5">
         <div class="row g-4">
             <div class="col-lg-8">
-                <span class="badge bg-primary mb-3">{{ $course['category'] }}</span>
-                <h1 class="fw-bold mb-3">{{ $course['title'] }}</h1>
-                <p class="lead mb-4">{{ $course['description'] }}</p>
+                <span class="badge bg-primary mb-3">{{ $course->category }}</span>
+                <h1 class="fw-bold mb-3">{{ $course->title }}</h1>
+                <p class="lead mb-4">{{ $course->description }}</p>
                 
                 <div class="d-flex flex-wrap gap-3 mb-4">
                     <div class="d-flex align-items-center">
-                        <i class="bi bi-star-fill text-warning me-1"></i>
-                        <span class="fw-medium me-1">{{ $course['rating'] }}</span>
-                        <span class="text-muted">({{ $course['students'] }} học viên)</span>
+                        <i class="bi bi-people-fill text-primary me-1"></i>
+                        <span>{{ $course->enrollments()->count() }} học viên</span>
                     </div>
+                    @if($course->sessions)
                     <div class="d-flex align-items-center">
-                        <i class="bi bi-clock me-1 text-muted"></i>
-                        <span>{{ $course['duration'] }}</span>
+                        <i class="bi bi-calendar-week me-1 text-muted"></i>
+                        <span>{{ $course->sessions }} buổi học</span>
                     </div>
+                    @endif
                     <div class="d-flex align-items-center">
                         <i class="bi bi-book me-1 text-muted"></i>
-                        <span>{{ count($course['lessons']) }} bài học</span>
+                        <span>{{ $course->lessons->count() }} bài học</span>
                     </div>
                     <div class="d-flex align-items-center">
-                        <i class="bi bi-globe me-1 text-muted"></i>
-                        <span>{{ $course['language'] }}</span>
+                        <i class="bi bi-bar-chart me-1 text-muted"></i>
+                        <span>{{ ucfirst(trans('app.' . $course->level)) }}</span>
                     </div>
                     <div class="d-flex align-items-center">
                         <i class="bi bi-calendar me-1 text-muted"></i>
-                        <span>Cập nhật: {{ \Carbon\Carbon::parse($course['lastUpdated'])->format('d/m/Y') }}</span>
+                        <span>Cập nhật: {{ $course->updated_at->format('d/m/Y') }}</span>
                     </div>
                 </div>
                 
                 <div class="d-flex align-items-center mb-4">
-                    <img src="{{ $course['instructor']['avatar'] ?? asset('images/avatar-placeholder.jpg') }}" 
-                         alt="{{ $course['instructor']['name'] }}" 
+                    <img src="{{ $course->teacher->avatar ?? asset('images/avatar-placeholder.jpg') }}" 
+                         alt="{{ $course->teacher->name }}" 
                          class="rounded-circle me-3" style="width: 48px; height: 48px; object-fit: cover;">
                     <div>
-                        <h5 class="fw-medium mb-0">Giảng viên: {{ $course['instructor']['name'] }}</h5>
-                        <p class="text-muted small mb-0">{{ $course['instructor']['title'] }}</p>
+                        <h5 class="fw-medium mb-0">Giảng viên: {{ $course->teacher->name }}</h5>
+                        <p class="text-muted small mb-0">{{ $course->teacher->email }}</p>
                     </div>
                 </div>
             </div>
@@ -50,37 +51,48 @@
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
-                        @if($course['enrolled'] ?? false)
+                        @if($isEnrolled)
                             <div class="mb-4">
                                 <h5 class="fw-semibold mb-3">Tiến độ khóa học</h5>
                                 <div class="progress mb-2" style="height: 10px;">
                                     <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" 
-                                         role="progressbar" style="width: {{ $progressPercentage }}%" 
-                                         aria-valuenow="{{ $progressPercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                         role="progressbar" style="width: {{ $progress }}%" 
+                                         aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                                 <p class="text-muted small">
-                                    {{ $completedLessons }}/{{ $totalLessons }} bài học ({{ $progressPercentage }}%)
+                                    {{ $progress }}% hoàn thành
                                 </p>
                             </div>
-                            <a href="{{ route('courses.learn', $course['id']) }}" class="btn btn-primary w-100 mb-3">
+                            <a href="{{ route('courses.learn', $course) }}" class="btn btn-primary w-100 mb-3">
                                 <i class="bi bi-play-fill me-2"></i> Tiếp tục học
-                            </a>
-                            <a href="{{ route('courses.certificate', $course['id']) }}" class="btn btn-outline-primary w-100">
-                                Xem chứng chỉ
                             </a>
                         @else
                             <div class="text-center mb-4">
-                                <h3 class="fw-bold mb-0">{{ number_format($course['price'], 0, ',', '.') }} ₫</h3>
+                                <h3 class="fw-bold mb-0">{{ number_format($course->price, 0, ',', '.') }} ₫</h3>
+                                @if($course->price == 0)
+                                    <span class="badge bg-success">Miễn phí</span>
+                                @endif
                             </div>
-                            <a href="{{ route('courses.enroll', $course['id']) }}" class="btn btn-primary w-100 mb-3">
-                                Đăng ký khóa học
-                            </a>
-                            <a href="{{ route('cart.add', $course['id']) }}" class="btn btn-outline-primary w-100 mb-4">
-                                Thêm vào giỏ hàng
-                            </a>
-                            <p class="text-muted small text-center mb-0">
-                                <i class="bi bi-shield-check me-1"></i> Đảm bảo hoàn tiền trong 30 ngày
-                            </p>
+                            <form action="{{ route('enrollments.enroll', $course) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-primary w-100 mb-3">
+                                    Đăng ký khóa học
+                                </button>
+                            </form>
+                        @endif
+                        
+                        @if(Auth::check() && (Auth::id() == $course->teacher_id || Auth::user()->isAdmin()))
+                            <div class="mt-3 pt-3 border-top">
+                                <h6 class="fw-semibold mb-3">Quản lý khóa học</h6>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('courses.edit', $course) }}" class="btn btn-outline-primary">
+                                        <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                                    </a>
+                                    <a href="{{ route('lessons.create', $course) }}" class="btn btn-outline-success">
+                                        <i class="bi bi-plus-circle me-1"></i> Thêm bài học
+                                    </a>
+                                </div>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -95,20 +107,6 @@
                     data-bs-target="#content-tab-pane" type="button" role="tab" 
                     aria-controls="content-tab-pane" aria-selected="true">
                 Nội dung khóa học
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-medium" id="assignments-tab" data-bs-toggle="tab" 
-                    data-bs-target="#assignments-tab-pane" type="button" role="tab" 
-                    aria-controls="assignments-tab-pane" aria-selected="false">
-                Bài tập
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-medium" id="reviews-tab" data-bs-toggle="tab" 
-                    data-bs-target="#reviews-tab-pane" type="button" role="tab" 
-                    aria-controls="reviews-tab-pane" aria-selected="false">
-                Đánh giá
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -128,135 +126,52 @@
                 <div class="card-header bg-white p-4 border-bottom">
                     <h4 class="fw-semibold mb-1">Nội dung khóa học</h4>
                     <p class="text-muted mb-0">
-                        {{ count($course['lessons']) }} bài học • {{ $formattedTotalDuration }}
+                        {{ $course->lessons->count() }} bài học
+                        @if($course->sessions)
+                            • {{ $course->sessions }} buổi học
+                        @endif
                     </p>
                 </div>
+                @if($course->lessons->count() > 0)
                 <div class="list-group list-group-flush">
-                    @foreach($course['lessons'] as $index => $lesson)
+                    @foreach($course->lessons as $index => $lesson)
                         <div class="list-group-item p-4 border-bottom">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    @if($lesson['completed'] ?? false)
-                                        <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                                            <i class="bi bi-check-circle text-success"></i>
-                                        </div>
-                                    @else
-                                        <div class="bg-light rounded-circle p-2 me-3" style="width: 40px; height: 40px;">
-                                            <span class="d-flex align-items-center justify-content-center fw-medium">
-                                                {{ $index + 1 }}
-                                            </span>
-                                        </div>
-                                    @endif
+                                    <div class="bg-light rounded-circle p-2 me-3" style="width: 40px; height: 40px;">
+                                        <span class="d-flex align-items-center justify-content-center fw-medium">
+                                            {{ $lesson->order }}
+                                        </span>
+                                    </div>
                                     <div>
-                                        <h5 class="fw-medium mb-1">{{ $lesson['title'] }}</h5>
-                                        <div class="d-flex align-items-center text-muted small">
-                                            <i class="bi bi-clock me-1"></i>
-                                            <span>{{ $lesson['duration'] }}</span>
-                                        </div>
+                                        <h5 class="fw-medium mb-1">{{ $lesson->title }}</h5>
                                     </div>
                                 </div>
-                                @if($course['enrolled'] ?? false)
-                                    <a href="{{ route('lessons.show', [$course['id'], $lesson['id']]) }}" 
-                                       class="btn {{ $lesson['completed'] ? 'btn-outline-primary' : 'btn-primary' }} btn-sm">
-                                        {{ $lesson['completed'] ? 'Xem lại' : 'Bắt đầu' }}
+                                @if($isEnrolled || Auth::id() == $course->teacher_id || (Auth::check() && Auth::user()->isAdmin()))
+                                    <a href="{{ route('lessons.show', $lesson) }}" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="bi bi-play-fill me-1"></i> Xem bài học
                                     </a>
                                 @endif
                             </div>
                         </div>
                     @endforeach
                 </div>
-            </div>
-        </div>
-        
-        <!-- Assignments Tab -->
-        <div class="tab-pane fade" id="assignments-tab-pane" role="tabpanel" 
-             aria-labelledby="assignments-tab" tabindex="0">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white p-4 border-bottom">
-                    <h4 class="fw-semibold mb-1">Bài tập</h4>
-                    <p class="text-muted mb-0">{{ count($course['assignments']) }} b��i tập</p>
-                </div>
-                <div class="list-group list-group-flush">
-                    @foreach($course['assignments'] as $assignment)
-                        <div class="list-group-item p-4 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="fw-medium mb-2">{{ $assignment['title'] }}</h5>
-                                    <p class="text-muted mb-0">
-                                        <i class="bi bi-calendar me-1"></i>
-                                        Hạn nộp: {{ \Carbon\Carbon::parse($assignment['dueDate'])->format('d/m/Y') }}
-                                    </p>
-                                </div>
-                                <div>
-                                    @if($assignment['completed'] ?? false)
-                                        <span class="badge bg-success p-2">
-                                            <i class="bi bi-check-circle me-1"></i> Đã nộp
-                                        </span>
-                                    @else
-                                        <a href="{{ route('assignments.show', $assignment['id']) }}" 
-                                           class="btn btn-primary btn-sm">
-                                            Xem chi tiết
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-        
-        <!-- Reviews Tab -->
-        <div class="tab-pane fade" id="reviews-tab-pane" role="tabpanel" 
-             aria-labelledby="reviews-tab" tabindex="0">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white p-4 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="fw-semibold mb-0">Đánh giá từ học viên</h4>
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="display-6 fw-bold me-2">{{ $course['rating'] }}</span>
-                                <div class="d-flex">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <i class="bi bi-star{{ $i <= $course['rating'] ? '-fill' : '' }} text-warning"></i>
-                                    @endfor
-                                </div>
-                            </div>
-                            <span class="text-muted">{{ count($course['reviews']) }} đánh giá</span>
-                        </div>
+                @else
+                <div class="card-body p-5 text-center">
+                    <div class="py-5">
+                        <i class="bi bi-journal-text text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3">Khóa học chưa có nội dung</h4>
+                        <p class="text-muted">Giảng viên đang chuẩn bị nội dung cho khóa học này.</p>
+                        
+                        @if(Auth::check() && Auth::id() == $course->teacher_id)
+                            <a href="{{ route('lessons.create', $course) }}" class="btn btn-primary mt-3">
+                                <i class="bi bi-plus-circle me-2"></i> Thêm bài học đầu tiên
+                            </a>
+                        @endif
                     </div>
                 </div>
-                <div class="card-body p-4">
-                    @if(count($course['reviews']) > 0)
-                        <div class="d-flex flex-column gap-4">
-                            @foreach($course['reviews'] as $review)
-                                <div class="border-bottom pb-4">
-                                    <div class="d-flex mb-3">
-                                        <img src="{{ $review['avatar'] ?? asset('images/avatar-placeholder.jpg') }}" 
-                                             alt="{{ $review['user'] }}" class="rounded-circle me-3" 
-                                             style="width: 48px; height: 48px; object-fit: cover;">
-                                        <div>
-                                            <h5 class="fw-medium mb-1">{{ $review['user'] }}</h5>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-2">
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        <i class="bi bi-star{{ $i <= $review['rating'] ? '-fill' : '' }} text-warning small"></i>
-                                                    @endfor
-                                                </div>
-                                                <span class="text-muted small">
-                                                    {{ \Carbon\Carbon::parse($review['date'])->format('d/m/Y') }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p class="mb-0">{{ $review['content'] }}</p>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="text-muted text-center py-4">Chưa có đánh giá nào cho khóa học này</p>
-                    @endif
-                </div>
+                @endif
             </div>
         </div>
         
@@ -265,27 +180,51 @@
              aria-labelledby="instructor-tab" tabindex="0">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <div class="d-flex flex-column flex-md-row gap-4">
-                        <div class="text-center">
-                            <img src="{{ $course['instructor']['avatar'] ?? asset('images/avatar-placeholder.jpg') }}" 
-                                 alt="{{ $course['instructor']['name'] }}" 
-                                 class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                            <h4 class="fw-semibold mb-1">{{ $course['instructor']['name'] }}</h4>
-                            <p class="text-muted">{{ $course['instructor']['title'] }}</p>
-                        </div>
+                    <div class="d-flex align-items-center mb-4">
+                        <img src="{{ $course->teacher->avatar ?? asset('images/avatar-placeholder.jpg') }}" 
+                             alt="{{ $course->teacher->name }}" class="rounded-circle me-4" 
+                             style="width: 100px; height: 100px; object-fit: cover;">
                         <div>
-                            <h5 class="fw-semibold mb-3">Giới thiệu</h5>
-                            <p>{{ $course['instructor']['bio'] }}</p>
-                            
-                            <h5 class="fw-semibold mb-3 mt-4">Chuyên môn</h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-light text-dark p-2">PHP</span>
-                                <span class="badge bg-light text-dark p-2">Laravel</span>
-                                <span class="badge bg-light text-dark p-2">Web Development</span>
-                                <span class="badge bg-light text-dark p-2">Database Design</span>
-                                <span class="badge bg-light text-dark p-2">API Development</span>
-                            </div>
+                            <h3 class="fw-bold mb-1">{{ $course->teacher->name }}</h3>
+                            <p class="text-muted mb-3">Giảng viên</p>
+                            <p>{{ $course->teacher->email }}</p>
                         </div>
+                    </div>
+                    
+                    <h4 class="fw-semibold mb-3">Các khóa học khác từ giảng viên này</h4>
+                    <div class="row g-4">
+                        @php
+                            $otherCourses = App\Models\Course::where('teacher_id', $course->teacher_id)
+                                ->where('id', '!=', $course->id)
+                                ->take(3)
+                                ->get();
+                        @endphp
+                        
+                        @forelse($otherCourses as $otherCourse)
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm course-card">
+                                    <img src="{{ $otherCourse->image ? asset('storage/' . $otherCourse->image) : asset('images/course-placeholder.jpg') }}" 
+                                         class="card-img-top" alt="{{ $otherCourse->title }}" 
+                                         style="height: 160px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <span class="badge bg-primary mb-2">{{ $otherCourse->category }}</span>
+                                        <h5 class="card-title fw-semibold">{{ $otherCourse->title }}</h5>
+                                        <p class="card-text text-muted">
+                                            {{ Str::limit($otherCourse->description, 80) }}
+                                        </p>
+                                    </div>
+                                    <div class="card-footer bg-white border-top-0">
+                                        <a href="{{ route('courses.show', $otherCourse) }}" class="btn btn-outline-primary w-100">
+                                            Xem khóa học
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12">
+                                <p class="text-muted">Giảng viên này chưa có khóa học khác.</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>

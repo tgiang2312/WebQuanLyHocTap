@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\Assignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class CommentController extends Controller
 {
@@ -16,45 +17,35 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
+        if (! Gate::allows('create-comment')) {
+            abort(403, 'Bạn không có quyền bình luận.');
+        }
+        
         $validated = $request->validate([
             'content' => 'required|string',
             'commentable_id' => 'required|integer',
-            'commentable_type' => 'required|string|in:App\\Models\\Lesson,App\\Models\\Course,App\\Models\\Assignment',
+            'commentable_type' => 'required|string|in:App\Models\Course,App\Models\Lesson',
+            'parent_id' => 'nullable|integer|exists:comments,id'
         ]);
         
-        // Check if user has access to the resource
+        // Kiểm tra đối tượng được bình luận có tồn tại không
         $commentableType = $validated['commentable_type'];
         $commentableId = $validated['commentable_id'];
-        $commentable = $commentableType::findOrFail($commentableId);
+        $commentable = $commentableType::find($commentableId);
         
-        // Determine the course based on the commentable type
-        $course = null;
-        if ($commentable instanceof Course) {
-            $course = $commentable;
-        } elseif ($commentable instanceof Lesson) {
-            $course = $commentable->course;
-        } elseif ($commentable instanceof Assignment) {
-            $course = $commentable->lesson->course;
+        if (!$commentable) {
+            return back()->with('error', 'Đối tượng bình luận không tồn tại.');
         }
         
-        // Check if user is either the teacher or enrolled in the course
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            $isEnrolled = $course->students()->where('user_id', Auth::id())->exists();
-            
-            if (!$isEnrolled) {
-                return back()->with('error', 'Bạn không có quyền bình luận vào tài nguyên này');
-            }
-        }
+        $comment = new Comment();
+        $comment->user_id = Auth::id();
+        $comment->content = $validated['content'];
+        $comment->commentable_type = $validated['commentable_type'];
+        $comment->commentable_id = $validated['commentable_id'];
+        $comment->parent_id = $validated['parent_id'] ?? null;
+        $comment->save();
         
-        // Create the comment
-        Comment::create([
-            'content' => $validated['content'],
-            'user_id' => Auth::id(),
-            'commentable_id' => $commentableId,
-            'commentable_type' => $commentableType,
-        ]);
-        
-        return back()->with('success', 'Bình luận của bạn đã được đăng thành công');
+        return back()->with('success', 'Bình luận đã được đăng thành công!');
     }
 
     /**
@@ -62,18 +53,18 @@ class CommentController extends Controller
      */
     public function update(Request $request, Comment $comment)
     {
-        // Check if user is the author of the comment
-        if (Auth::id() !== $comment->user_id && !Auth::user()->isAdmin()) {
-            return back()->with('error', 'Bạn không có quyền chỉnh sửa bình luận này');
+        if (! Gate::allows('update-comment', $comment)) {
+            abort(403, 'Bạn không có quyền cập nhật bình luận này.');
         }
         
         $validated = $request->validate([
             'content' => 'required|string',
         ]);
         
-        $comment->update($validated);
+        $comment->content = $validated['content'];
+        $comment->save();
         
-        return back()->with('success', 'Bình luận đã được cập nhật thành công');
+        return back()->with('success', 'Bình luận đã được cập nhật thành công!');
     }
 
     /**
@@ -81,13 +72,12 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        // Check if user is the author of the comment or admin
-        if (Auth::id() !== $comment->user_id && !Auth::user()->isAdmin()) {
-            return back()->with('error', 'Bạn không có quyền xóa bình luận này');
+        if (! Gate::allows('delete-comment', $comment)) {
+            abort(403, 'Bạn không có quyền xóa bình luận này.');
         }
         
         $comment->delete();
         
-        return back()->with('success', 'Bình luận đã được xóa thành công');
+        return back()->with('success', 'Bình luận đã được xóa thành công!');
     }
 } 

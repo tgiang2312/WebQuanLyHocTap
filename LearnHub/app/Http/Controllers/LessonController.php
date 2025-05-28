@@ -6,6 +6,8 @@ use App\Models\Lesson;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class LessonController extends Controller
 {
@@ -14,8 +16,8 @@ class LessonController extends Controller
      */
     public function create(Course $course)
     {
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền thêm bài học');
+        if (! Gate::allows('create-lesson', $course)) {
+            abort(403, 'Bạn không có quyền tạo bài học cho khóa học này.');
         }
         
         return view('lessons.create', compact('course'));
@@ -26,25 +28,42 @@ class LessonController extends Controller
      */
     public function store(Request $request, Course $course)
     {
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            return redirect()->route('courses.show', $course)->with('error', 'Bạn không có quyền thêm bài học');
+        if (! Gate::allows('create-lesson', $course)) {
+            abort(403, 'Bạn không có quyền tạo bài học cho khóa học này.');
         }
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
-            'video_url' => 'nullable|url',
-            'order_number' => 'nullable|integer',
-        ]);
-
-        // If order number is not provided, put it at the end
-        if (!isset($validated['order_number'])) {
-            $validated['order_number'] = $course->lessons()->max('order_number') + 1;
-        }
-
-        $lesson = $course->lessons()->create($validated);
         
-        return redirect()->route('courses.show', $course)->with('success', 'Bài học đã được tạo thành công');
+        $validated = $request->validate([
+            'title' => 'required|max:255',
+            'content' => 'required',
+            'video_url' => 'nullable|url',
+            'order' => 'nullable|integer',
+            'files.*' => 'nullable|file|max:10240', // 10MB max file size
+        ]);
+        
+        $lesson = new Lesson();
+        $lesson->title = $validated['title'];
+        $lesson->content = $validated['content'];
+        $lesson->video_url = $validated['video_url'] ?? null;
+        $lesson->order = $validated['order'] ?? $course->lessons()->count() + 1;
+        $lesson->course_id = $course->id;
+        
+        // Xử lý file đính kèm
+        if ($request->hasFile('files')) {
+            $fileUrls = [];
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('lesson-files/' . $course->id, 'public');
+                $fileUrls[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'size' => $file->getSize(),
+                ];
+            }
+            $lesson->files = json_encode($fileUrls);
+        }
+        
+        $lesson->save();
+        
+        return redirect()->route('courses.show', $course)->with('success', 'Bài học đã được tạo thành công!');
     }
 
     /**
@@ -53,20 +72,35 @@ class LessonController extends Controller
     public function show(Lesson $lesson)
     {
         $course = $lesson->course;
+        $isEnrolled = false;
+        $progress = 0;
         
-        // Check if user is enrolled or is the teacher
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            $isEnrolled = $course->students()->where('user_id', Auth::id())->exists();
+        if (Auth::check()) {
+            $enrollment = Auth::user()->enrolledCourses()->where('course_id', $course->id)->first();
+            $isEnrolled = (bool) $enrollment;
+            $progress = $enrollment ? $enrollment->pivot->progress : 0;
             
-            if (!$isEnrolled) {
+            // Nếu người dùng không phải giáo viên của khóa học và chưa đăng ký
+            if (!$isEnrolled && Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
                 return redirect()->route('courses.show', $course)
-                    ->with('error', 'Bạn cần đăng ký khóa học để xem bài học này');
+                    ->with('error', 'Bạn cần đăng ký khóa học để xem bài học này.');
             }
+        } else {
+            return redirect()->route('login')
+                ->with('error', 'Bạn cần đăng nhập để xem bài học này.');
         }
         
-        $lesson->load(['course', 'assignments']);
-        
-        return view('lessons.show', compact('lesson'));
+        $nextLesson = $course->lessons()
+            ->where('order', '>', $lesson->order)
+            ->orderBy('order')
+            ->first();
+            
+        $prevLesson = $course->lessons()
+            ->where('order', '<', $lesson->order)
+            ->orderByDesc('order')
+            ->first();
+            
+        return view('lessons.show', compact('lesson', 'course', 'nextLesson', 'prevLesson', 'isEnrolled', 'progress'));
     }
 
     /**
@@ -74,14 +108,12 @@ class LessonController extends Controller
      */
     public function edit(Lesson $lesson)
     {
-        $course = $lesson->course;
-        
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            return redirect()->route('lessons.show', $lesson)
-                ->with('error', 'Bạn không có quyền chỉnh sửa bài học này');
+        if (! Gate::allows('update-lesson', $lesson)) {
+            abort(403, 'Bạn không có quyền chỉnh sửa bài học này.');
         }
         
-        return view('lessons.edit', compact('lesson'));
+        $course = $lesson->course;
+        return view('lessons.edit', compact('lesson', 'course'));
     }
 
     /**
@@ -89,23 +121,58 @@ class LessonController extends Controller
      */
     public function update(Request $request, Lesson $lesson)
     {
-        $course = $lesson->course;
-        
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            return redirect()->route('lessons.show', $lesson)
-                ->with('error', 'Bạn không có quyền chỉnh sửa bài học này');
+        if (! Gate::allows('update-lesson', $lesson)) {
+            abort(403, 'Bạn không có quyền chỉnh sửa bài học này.');
         }
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
-            'video_url' => 'nullable|url',
-            'order_number' => 'nullable|integer',
-        ]);
-
-        $lesson->update($validated);
         
-        return redirect()->route('lessons.show', $lesson)->with('success', 'Bài học đã được cập nhật thành công');
+        $validated = $request->validate([
+            'title' => 'required|max:255',
+            'content' => 'required',
+            'video_url' => 'nullable|url',
+            'order' => 'nullable|integer',
+            'files.*' => 'nullable|file|max:10240', // 10MB max file size
+        ]);
+        
+        $lesson->title = $validated['title'];
+        $lesson->content = $validated['content'];
+        $lesson->video_url = $validated['video_url'] ?? null;
+        $lesson->order = $validated['order'] ?? $lesson->order;
+        
+        // Xử lý file đính kèm
+        if ($request->hasFile('files')) {
+            $currentFiles = json_decode($lesson->files ?? '[]', true);
+            $fileUrls = $currentFiles;
+            
+            foreach ($request->file('files') as $file) {
+                $path = $file->store('lesson-files/' . $lesson->course_id, 'public');
+                $fileUrls[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'size' => $file->getSize(),
+                ];
+            }
+            $lesson->files = json_encode($fileUrls);
+        }
+        
+        // Xóa file nếu có yêu cầu
+        if ($request->has('delete_files')) {
+            $currentFiles = json_decode($lesson->files ?? '[]', true);
+            $filesToKeep = [];
+            
+            foreach ($currentFiles as $file) {
+                if (!in_array($file['path'], $request->delete_files)) {
+                    $filesToKeep[] = $file;
+                } else {
+                    Storage::disk('public')->delete($file['path']);
+                }
+            }
+            
+            $lesson->files = json_encode($filesToKeep);
+        }
+        
+        $lesson->save();
+        
+        return redirect()->route('lessons.show', $lesson)->with('success', 'Bài học đã được cập nhật thành công!');
     }
 
     /**
@@ -113,16 +180,24 @@ class LessonController extends Controller
      */
     public function destroy(Lesson $lesson)
     {
+        if (! Gate::allows('delete-lesson', $lesson)) {
+            abort(403, 'Bạn không có quyền xóa bài học này.');
+        }
+        
         $course = $lesson->course;
         
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            return redirect()->route('lessons.show', $lesson)
-                ->with('error', 'Bạn không có quyền xóa bài học này');
+        // Xóa các file đính kèm
+        $files = json_decode($lesson->files ?? '[]', true);
+        foreach ($files as $file) {
+            Storage::disk('public')->delete($file['path']);
         }
         
         $lesson->delete();
         
-        return redirect()->route('courses.show', $course)->with('success', 'Bài học đã được xóa thành công');
+        // Cập nhật thứ tự các bài học còn lại
+        $course->lessons()->where('order', '>', $lesson->order)->decrement('order');
+        
+        return redirect()->route('courses.show', $course)->with('success', 'Bài học đã được xóa thành công!');
     }
     
     /**
@@ -130,20 +205,22 @@ class LessonController extends Controller
      */
     public function reorder(Request $request, Course $course)
     {
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            return response()->json(['error' => 'Bạn không có quyền sắp xếp lại bài học'], 403);
+        if (! Gate::allows('update-course', $course)) {
+            abort(403, 'Bạn không có quyền sắp xếp lại bài học của khóa học này.');
         }
         
-        $request->validate([
+        $validated = $request->validate([
             'lessons' => 'required|array',
-            'lessons.*.id' => 'required|exists:lessons,id',
-            'lessons.*.order' => 'required|integer|min:0',
+            'lessons.*.id' => 'required|integer|exists:lessons,id',
+            'lessons.*.order' => 'required|integer|min:1',
         ]);
         
-        foreach ($request->lessons as $item) {
-            Lesson::where('id', $item['id'])
-                  ->where('course_id', $course->id)
-                  ->update(['order_number' => $item['order']]);
+        foreach ($validated['lessons'] as $lessonData) {
+            $lesson = Lesson::find($lessonData['id']);
+            if ($lesson && $lesson->course_id == $course->id) {
+                $lesson->order = $lessonData['order'];
+                $lesson->save();
+            }
         }
         
         return response()->json(['success' => true]);

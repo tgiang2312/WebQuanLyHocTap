@@ -4,7 +4,14 @@
 
 @section('content')
 <div class="container py-5">
-    <h1 class="fw-bold mb-4">Bảng điều khiển</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Bảng điều khiển</h1>
+        @if(Auth::user()->isTeacher() || Auth::user()->isAdmin())
+        <a href="{{ route('courses.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i> Tạo khóa học mới
+        </a>
+        @endif
+    </div>
     
     <!-- Overview Cards -->
     <div class="row g-4 mb-5">
@@ -172,6 +179,70 @@
             </div>
         @endforeach
     </div>
+    
+    @if(Auth::user()->isTeacher() || Auth::user()->isAdmin())
+    <!-- My Created Courses Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-semibold mb-0">Khóa học tôi đã tạo</h2>
+        <a href="{{ route('courses.create') }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-plus-circle me-2"></i> Tạo khóa học mới
+        </a>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        @php
+            $myCreatedCourses = App\Models\Course::where('teacher_id', Auth::id())->latest()->take(3)->get();
+        @endphp
+        
+        @if($myCreatedCourses->count() > 0)
+            @foreach($myCreatedCourses as $course)
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 course-card">
+                        <div class="position-relative">
+                            <img src="{{ $course->image ? asset('storage/' . $course->image) : asset('images/placeholder.jpg') }}" 
+                                 alt="{{ $course->title }}" class="card-img-top" 
+                                 style="height: 160px; object-fit: cover;">
+                            
+                            <span class="position-absolute top-0 end-0 badge {{ $course->status == 'published' ? 'bg-success' : 'bg-warning' }} m-2">
+                                {{ $course->status == 'published' ? 'Đã xuất bản' : 'Bản nháp' }}
+                            </span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <span class="badge bg-primary mb-2">{{ $course->category }}</span>
+                            <h5 class="card-title fw-semibold mb-2">{{ $course->title }}</h5>
+                            <p class="card-text text-muted small mb-3">
+                                {{ Str::limit($course->description, 100) }}
+                            </p>
+                            
+                            <div class="d-flex align-items-center justify-content-between text-muted small">
+                                <span><i class="bi bi-people-fill me-1"></i> {{ $course->enrollments()->count() }} học viên</span>
+                                <span><i class="bi bi-book me-1"></i> {{ $course->lessons()->count() }} bài học</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-white border-top">
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('courses.show', $course) }}" class="btn btn-outline-primary flex-grow-1">
+                                    <i class="bi bi-eye me-1"></i> Xem
+                                </a>
+                                <a href="{{ route('courses.edit', $course) }}" class="btn btn-outline-secondary flex-grow-1">
+                                    <i class="bi bi-pencil me-1"></i> Sửa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <p class="mb-0">Bạn chưa tạo khóa học nào. Nhấn vào "Tạo khóa học mới" để bắt đầu.</p>
+                </div>
+            </div>
+        @endif
+    </div>
+    @endif
     
     <!-- Assignments and Achievements Section -->
     <div class="row g-4">

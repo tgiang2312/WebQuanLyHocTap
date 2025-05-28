@@ -42,7 +42,11 @@ class CourseController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'category' => 'required|string',
+            'level' => 'required|in:beginner,intermediate,advanced',
             'status' => 'required|in:draft,published',
+            'sessions' => 'nullable|integer|min:1',
+            'price' => 'nullable|numeric|min:0',
             'thumbnail' => 'nullable|image|max:2048',
         ]);
 
@@ -94,7 +98,11 @@ class CourseController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'category' => 'required|string',
+            'level' => 'required|in:beginner,intermediate,advanced',
             'status' => 'required|in:draft,published',
+            'sessions' => 'nullable|integer|min:1',
+            'price' => 'nullable|numeric|min:0',
             'thumbnail' => 'nullable|image|max:2048',
         ]);
 

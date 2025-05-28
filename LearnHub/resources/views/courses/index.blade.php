@@ -8,6 +8,15 @@
         <div class="col-lg-8 mx-auto text-center">
             <h1 class="fw-bold mb-3">Khóa học</h1>
             <p class="lead">Khám phá các khóa học chất lượng từ những giáo viên giàu kinh nghiệm</p>
+            @auth
+                @if(Auth::user()->isTeacher() || Auth::user()->isAdmin())
+                <div class="mt-4">
+                    <a href="{{ route('courses.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i> Tạo khóa học mới
+                    </a>
+                </div>
+                @endif
+            @endauth
         </div>
     </div>
     
