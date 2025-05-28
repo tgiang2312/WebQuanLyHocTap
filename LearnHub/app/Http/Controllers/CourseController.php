@@ -241,8 +241,8 @@ class CourseController extends Controller
         $currentLesson = null;
         
         // Nếu người dùng đã đăng ký, lấy bài học cuối cùng họ đã học
-        if ($enrollment && $enrollment->pivot->last_lesson_id) {
-            $currentLesson = $course->lessons()->find($enrollment->pivot->last_lesson_id);
+        if ($enrollment && $enrollment->last_lesson_id) {
+            $currentLesson = $course->lessons()->find($enrollment->last_lesson_id);
         }
         
         // Nếu không có bài học cuối cùng, lấy bài học đầu tiên
@@ -253,7 +253,7 @@ class CourseController extends Controller
         // Tính toán tiến độ
         $progress = 0;
         if ($enrollment) {
-            $progress = $enrollment->pivot->progress ?? 0;
+            $progress = $enrollment->progress ?? 0;
         }
         
         return view('courses.learn', compact('course', 'lessons', 'currentLesson', 'progress'));

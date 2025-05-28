@@ -150,7 +150,7 @@
                                 <div class="d-flex align-items-center">
                                     <div class="bg-light rounded-circle p-2 me-3" style="width: 40px; height: 40px;">
                                         <span class="d-flex align-items-center justify-content-center fw-medium">
-                                            {{ $lesson->order }}
+                                            {{ $lesson->order_number }}
                                         </span>
                                     </div>
                                     <div>

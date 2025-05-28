@@ -40,11 +40,11 @@
                             <label for="category" class="form-label fw-semibold">Danh mục <span class="text-danger">*</span></label>
                             <select class="form-select" id="category" name="category" required>
                                 <option value="" selected disabled>Chọn danh mục</option>
-                                <option value="web" {{ old('category') == 'web' ? 'selected' : '' }}>Lập trình Web</option>
-                                <option value="mobile" {{ old('category') == 'mobile' ? 'selected' : '' }}>Lập trình Di động</option>
-                                <option value="database" {{ old('category') == 'database' ? 'selected' : '' }}>Cơ sở dữ liệu</option>
-                                <option value="design" {{ old('category') == 'design' ? 'selected' : '' }}>Thiết kế UI/UX</option>
-                                <option value="ai" {{ old('category') == 'ai' ? 'selected' : '' }}>Trí tuệ nhân tạo</option>
+                                <option value="web" {{ old('category') == 'web' ? 'selected' : '' }}>Lập trình</option>
+                                <option value="mobile" {{ old('category') == 'marketing' ? 'selected' : '' }}>Marketing</option>
+                                <option value="database" {{ old('category') == 'design' ? 'selected' : '' }}>Thiết kế</option>
+                                <option value="design" {{ old('category') == 'bussiness' ? 'selected' : '' }}>Kinh Doanh</option>
+                                <option value="ai" {{ old('category') == 'language' ? 'selected' : '' }}>Ngoại ngữ</option>
                                 <option value="network" {{ old('category') == 'network' ? 'selected' : '' }}>Mạng máy tính</option>
                                 <option value="security" {{ old('category') == 'security' ? 'selected' : '' }}>Bảo mật</option>
                                 <option value="other" {{ old('category') == 'other' ? 'selected' : '' }}>Khác</option>

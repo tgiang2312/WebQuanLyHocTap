@@ -28,4 +28,10 @@ class Lesson extends Model
     {
         return $this->hasMany(Assignment::class);
     }
+
+    // Relationship with comments
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
 } 

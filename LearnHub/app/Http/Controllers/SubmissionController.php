@@ -11,160 +11,157 @@ use Illuminate\Support\Facades\Storage;
 class SubmissionController extends Controller
 {
     /**
-     * Show the form for creating/editing a submission.
+     * Hiển thị form nộp bài tập
      */
     public function create(Assignment $assignment)
     {
-        $lesson = $assignment->lesson;
-        $course = $lesson->course;
-        
-        // Check if user is enrolled
-        $isEnrolled = $course->students()->where('user_id', Auth::id())->exists();
+        // Kiểm tra xem người dùng đã đăng ký khóa học chưa
+        $isEnrolled = $assignment->course->enrollments()->where('user_id', Auth::id())->exists();
         
         if (!$isEnrolled) {
-            return redirect()->route('assignments.show', $assignment)
-                ->with('error', 'Bạn cần đăng ký khóa học để nộp bài');
+            return redirect()->route('courses.show', $assignment->course)
+                ->with('error', 'Bạn cần đăng ký khóa học trước khi nộp bài tập.');
         }
         
-        // Check if past due date
-        if ($assignment->due_date && now() > $assignment->due_date) {
-            return redirect()->route('assignments.show', $assignment)
-                ->with('error', 'Bài tập đã quá hạn nộp');
-        }
+        // Kiểm tra xem người dùng đã nộp bài chưa
+        $submission = $assignment->submissions()->where('user_id', Auth::id())->first();
         
-        // Get existing submission if any
-        $submission = Submission::where('assignment_id', $assignment->id)
-            ->where('user_id', Auth::id())
-            ->first();
-            
-        return view('submissions.create', compact('assignment', 'submission'));
+        return view('assignments.show', compact('assignment', 'submission'));
     }
-
+    
     /**
-     * Store a newly created submission in storage or update existing one.
+     * Lưu bài tập đã nộp
      */
     public function store(Request $request, Assignment $assignment)
     {
-        $lesson = $assignment->lesson;
-        $course = $lesson->course;
-        
-        // Check if user is enrolled
-        $isEnrolled = $course->students()->where('user_id', Auth::id())->exists();
+        // Kiểm tra xem người dùng đã đăng ký khóa học chưa
+        $isEnrolled = $assignment->course->enrollments()->where('user_id', Auth::id())->exists();
         
         if (!$isEnrolled) {
-            return redirect()->route('assignments.show', $assignment)
-                ->with('error', 'Bạn cần đăng ký khóa học để nộp bài');
+            return redirect()->route('courses.show', $assignment->course)
+                ->with('error', 'Bạn cần đăng ký khóa học trước khi nộp bài tập.');
         }
         
-        // Check if past due date
-        if ($assignment->due_date && now() > $assignment->due_date) {
-            return redirect()->route('assignments.show', $assignment)
-                ->with('error', 'Bài tập đã quá hạn nộp');
-        }
-        
-        $validated = $request->validate([
-            'content' => 'nullable|string',
-            'file' => 'nullable|file|max:10240', // 10MB max
-        ]);
-        
-        // At least one of content or file must be provided
-        if (empty($validated['content']) && !$request->hasFile('file')) {
-            return back()->withErrors(['content' => 'Bạn phải cung cấp nội dung hoặc tệp đính kèm']);
-        }
-        
-        // Find existing submission or create new one
-        $submission = Submission::firstOrNew([
-            'assignment_id' => $assignment->id,
-            'user_id' => Auth::id(),
-        ]);
-        
-        if (isset($validated['content'])) {
-            $submission->content = $validated['content'];
-        }
-        
-        if ($request->hasFile('file')) {
-            // Delete old file if exists
-            if ($submission->file_url) {
-                Storage::disk('public')->delete($submission->file_url);
+        // Xử lý nộp bài tập dạng form
+        if ($assignment->is_form) {
+            $answers = $request->input('answers', []);
+            $fileAnswers = [];
+            
+            // Xử lý các câu trả lời dạng file
+            if ($request->hasFile('file_answers')) {
+                foreach ($request->file('file_answers') as $index => $file) {
+                    $path = $file->store('submissions/' . Auth::id(), 'public');
+                    $fileAnswers[$index] = [
+                        'filename' => $file->getClientOriginalName(),
+                        'path' => $path
+                    ];
+                }
             }
             
-            $path = $request->file('file')->store('submissions', 'public');
-            $submission->file_url = $path;
+            // Tìm submission hiện có hoặc tạo mới
+            $submission = $assignment->submissions()->updateOrCreate(
+                ['user_id' => Auth::id()],
+                [
+                    'content' => json_encode(['answers' => $answers, 'file_answers' => $fileAnswers]),
+                    'submitted_at' => now(),
+                    'status' => 'submitted',
+                    'is_late' => $assignment->due_date->isPast()
+                ]
+            );
+        } else {
+            // Xử lý nộp bài tập thông thường
+            $request->validate([
+                'content' => 'nullable|string',
+                'file' => 'nullable|file|max:10240', // Max 10MB
+            ]);
+            
+            // Tìm submission hiện có hoặc tạo mới
+            $submission = $assignment->submissions()->updateOrCreate(
+                ['user_id' => Auth::id()],
+                [
+                    'content' => $request->content,
+                    'submitted_at' => now(),
+                    'status' => 'submitted',
+                    'is_late' => $assignment->due_date->isPast()
+                ]
+            );
+            
+            // Xử lý file đính kèm
+            if ($request->hasFile('file')) {
+                // Xóa file cũ nếu có
+                if ($submission->file_path) {
+                    Storage::disk('public')->delete($submission->file_path);
+                }
+                
+                $path = $request->file('file')->store('submissions/' . Auth::id(), 'public');
+                $submission->file_path = $path;
+                $submission->file_name = $request->file('file')->getClientOriginalName();
+                $submission->save();
+            }
         }
         
-        $submission->submitted_at = now();
-        $submission->save();
-        
-        return redirect()->route('assignments.show', $assignment)
-            ->with('success', 'Bài làm của bạn đã được nộp thành công');
+        return redirect()->route('students.assignments')
+            ->with('success', 'Bài tập đã được nộp thành công.');
     }
-
+    
     /**
-     * Display a specific submission (for grading by teacher).
+     * Hiển thị chi tiết bài nộp
      */
     public function show(Submission $submission)
     {
-        $assignment = $submission->assignment;
-        $lesson = $assignment->lesson;
-        $course = $lesson->course;
-        
-        // Only teacher of the course or the student who submitted can view
-        if (Auth::id() !== $course->teacher_id && 
-            Auth::id() !== $submission->user_id && 
-            !Auth::user()->isAdmin()) {
-            return redirect()->route('assignments.show', $assignment)
-                ->with('error', 'Bạn không có quyền xem bài nộp này');
+        // Kiểm tra quyền xem
+        if (Auth::id() !== $submission->user_id && 
+            Auth::id() !== $submission->assignment->course->teacher_id && 
+            Auth::user()->role !== 'admin') {
+            abort(403, 'Bạn không có quyền xem bài nộp này.');
         }
         
         return view('submissions.show', compact('submission'));
     }
-
+    
     /**
-     * Grade a submission (teacher only).
+     * Chấm điểm bài nộp
      */
     public function grade(Request $request, Submission $submission)
     {
-        $assignment = $submission->assignment;
-        $lesson = $assignment->lesson;
-        $course = $lesson->course;
-        
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
-            return redirect()->route('submissions.show', $submission)
-                ->with('error', 'Bạn không có quyền chấm điểm');
+        // Kiểm tra quyền chấm điểm
+        if (Auth::id() !== $submission->assignment->course->teacher_id && 
+            Auth::user()->role !== 'admin') {
+            abort(403, 'Bạn không có quyền chấm điểm bài nộp này.');
         }
         
-        $validated = $request->validate([
-            'grade' => 'required|numeric|min:0|max:10',
-            'feedback' => 'nullable|string',
+        $request->validate([
+            'score' => 'required|numeric|min:0|max:' . $submission->assignment->max_score,
+            'feedback' => 'nullable|string'
         ]);
         
-        $submission->update($validated);
+        $submission->score = $request->score;
+        $submission->grade = $request->score;
+        $submission->feedback = $request->feedback;
+        $submission->graded_at = now();
+        $submission->status = 'graded';
+        $submission->save();
         
-        return redirect()->route('submissions.show', $submission)
-            ->with('success', 'Bài làm đã được chấm điểm thành công');
+        return redirect()->back()->with('success', 'Bài nộp đã được chấm điểm thành công.');
     }
     
     /**
-     * Download submission file.
+     * Tải xuống file đính kèm
      */
     public function download(Submission $submission)
     {
-        $assignment = $submission->assignment;
-        $lesson = $assignment->lesson;
-        $course = $lesson->course;
-        
-        // Only teacher of the course or the student who submitted can download
-        if (Auth::id() !== $course->teacher_id && 
-            Auth::id() !== $submission->user_id && 
-            !Auth::user()->isAdmin()) {
-            return redirect()->route('assignments.show', $assignment)
-                ->with('error', 'Bạn không có quyền tải xuống tệp này');
+        // Kiểm tra quyền tải xuống
+        if (Auth::id() !== $submission->user_id && 
+            Auth::id() !== $submission->assignment->course->teacher_id && 
+            Auth::user()->role !== 'admin') {
+            abort(403, 'Bạn không có quyền tải xuống file này.');
         }
         
-        if (!$submission->file_url) {
-            return back()->with('error', 'Không có tệp đính kèm');
+        if (!$submission->file_path) {
+            return redirect()->back()->with('error', 'Không tìm thấy file đính kèm.');
         }
         
-        return Storage::disk('public')->download($submission->file_url);
+        $path = storage_path('app/public/' . $submission->file_path);
+        return response()->download($path, $submission->file_name);
     }
 } 

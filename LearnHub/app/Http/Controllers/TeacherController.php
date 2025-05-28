@@ -101,17 +101,115 @@ class TeacherController extends Controller
             'description' => 'required|string',
             'due_date' => 'required|date',
             'max_score' => 'required|numeric|min:0',
+            'is_form' => 'boolean',
+            'questions' => 'nullable|array',
         ]);
+        
+        // Lấy bài học đầu tiên của khóa học làm lesson_id
+        $lessonId = null;
+        $course = Course::find($request->course_id);
+        if ($course) {
+            $firstLesson = $course->lessons()->orderBy('order_number', 'asc')->first();
+            if ($firstLesson) {
+                $lessonId = $firstLesson->id;
+            } else {
+                // Nếu khóa học không có bài học nào, tạo một bài học mặc định
+                $lesson = new Lesson();
+                $lesson->course_id = $course->id;
+                $lesson->title = 'Bài tập ' . $request->title;
+                $lesson->content = 'Bài học cho bài tập ' . $request->title;
+                $lesson->order_number = 1;
+                $lesson->save();
+                $lessonId = $lesson->id;
+            }
+        }
+        
+        if (!$lessonId) {
+            return redirect()->back()->with('error', 'Không thể tạo bài tập vì không tìm thấy bài học. Vui lòng tạo bài học trước.');
+        }
         
         $assignment = new Assignment();
         $assignment->title = $request->title;
         $assignment->course_id = $request->course_id;
+        $assignment->lesson_id = $lessonId;
         $assignment->description = $request->description;
         $assignment->due_date = $request->due_date;
         $assignment->max_score = $request->max_score;
+        
+        // Xử lý bài tập dạng form
+        $assignment->is_form = $request->has('is_form') ? true : false;
+        if ($assignment->is_form && $request->has('questions')) {
+            $assignment->questions = $request->questions;
+        }
+        
         $assignment->save();
         
         return redirect()->route('teachers.assignments')->with('success', 'Bài tập đã được tạo thành công.');
+    }
+    
+    /**
+     * Hiển thị form tạo bài tập dạng Google Form
+     */
+    public function createFormAssignment()
+    {
+        $courses = Course::where('teacher_id', Auth::id())->get();
+        return view('teachers.assignments.create_form', compact('courses'));
+    }
+    
+    /**
+     * Lưu bài tập dạng form
+     */
+    public function storeFormAssignment(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'course_id' => 'required|exists:courses,id',
+            'description' => 'required|string',
+            'due_date' => 'required|date',
+            'max_score' => 'required|numeric|min:0',
+            'questions' => 'required|array|min:1',
+            'questions.*.type' => 'required|in:multiple_choice,checkbox,short_answer,paragraph,file_upload',
+            'questions.*.title' => 'required|string',
+            'questions.*.options' => 'nullable|array',
+            'questions.*.required' => 'boolean',
+            'questions.*.points' => 'nullable|numeric|min:0',
+        ]);
+        
+        // Lấy bài học đầu tiên của khóa học làm lesson_id
+        $lessonId = null;
+        $course = Course::find($request->course_id);
+        if ($course) {
+            $firstLesson = $course->lessons()->orderBy('order_number', 'asc')->first();
+            if ($firstLesson) {
+                $lessonId = $firstLesson->id;
+            } else {
+                // Nếu khóa học không có bài học nào, tạo một bài học mặc định
+                $lesson = new Lesson();
+                $lesson->course_id = $course->id;
+                $lesson->title = 'Bài tập ' . $request->title;
+                $lesson->content = 'Bài học cho bài tập ' . $request->title;
+                $lesson->order_number = 1;
+                $lesson->save();
+                $lessonId = $lesson->id;
+            }
+        }
+        
+        if (!$lessonId) {
+            return redirect()->back()->with('error', 'Không thể tạo bài tập vì không tìm thấy bài học. Vui lòng tạo bài học trước.');
+        }
+        
+        $assignment = new Assignment();
+        $assignment->title = $request->title;
+        $assignment->course_id = $request->course_id;
+        $assignment->lesson_id = $lessonId;
+        $assignment->description = $request->description;
+        $assignment->due_date = $request->due_date;
+        $assignment->max_score = $request->max_score;
+        $assignment->is_form = true;
+        $assignment->questions = $request->questions;
+        $assignment->save();
+        
+        return redirect()->route('teachers.assignments')->with('success', 'Bài tập dạng form đã được tạo thành công.');
     }
     
     /**

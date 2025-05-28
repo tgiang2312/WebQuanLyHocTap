@@ -222,6 +222,8 @@ Route::middleware(['auth', 'verified', 'teacher'])->group(function () {
     Route::get('/teacher/assignments', [TeacherController::class, 'assignments'])->name('teachers.assignments');
     Route::get('/teacher/assignments/create', [TeacherController::class, 'createAssignment'])->name('teachers.assignments.create');
     Route::post('/teacher/assignments', [TeacherController::class, 'storeAssignment'])->name('teachers.assignments.store');
+    Route::get('/teacher/assignments/create-form', [TeacherController::class, 'createFormAssignment'])->name('teachers.assignments.create_form');
+    Route::post('/teacher/assignments/form', [TeacherController::class, 'storeFormAssignment'])->name('teachers.assignments.store_form');
     Route::get('/teacher/analytics', [TeacherController::class, 'analytics'])->name('teachers.analytics');
     Route::get('/teacher/activities', [TeacherController::class, 'activities'])->name('teachers.activities');
 });

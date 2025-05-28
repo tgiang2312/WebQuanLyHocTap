@@ -16,7 +16,7 @@ class AssignmentController extends Controller
     {
         $course = $lesson->course;
         
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('lessons.show', $lesson)
                 ->with('error', 'Bạn không có quyền tạo bài tập');
         }
@@ -31,7 +31,7 @@ class AssignmentController extends Controller
     {
         $course = $lesson->course;
         
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('lessons.show', $lesson)
                 ->with('error', 'Bạn không có quyền tạo bài tập');
         }
@@ -40,11 +40,55 @@ class AssignmentController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
+            'max_score' => 'required|integer|min:1|max:100',
+            'is_form' => 'required|boolean',
         ]);
         
-        $assignment = $lesson->assignments()->create($validated);
+        // Tạo bài tập cơ bản
+        $assignment = new Assignment();
+        $assignment->lesson_id = $lesson->id;
+        $assignment->course_id = $course->id;
+        $assignment->title = $validated['title'];
+        $assignment->description = $validated['description'];
+        $assignment->due_date = $validated['due_date'];
+        $assignment->max_score = $validated['max_score'];
+        $assignment->is_form = $validated['is_form'];
         
-        return redirect()->route('lessons.show', $lesson)
+        // Nếu là bài tập dạng form, lưu các câu hỏi
+        if ($validated['is_form']) {
+            $questions = $request->input('questions', []);
+            
+            // Loại bỏ các câu hỏi trống
+            $filteredQuestions = [];
+            foreach ($questions as $key => $question) {
+                if (!empty($question['text'])) {
+                    // Chuyển đổi từ text sang title
+                    $question['title'] = $question['text'];
+                    unset($question['text']);
+                    
+                    // Đảm bảo các trường cần thiết tồn tại
+                    $question['required'] = isset($question['required']) ? true : false;
+                    $question['points'] = $validated['max_score'] / count($questions); // Điểm mặc định cho mỗi câu hỏi
+                    
+                    // Xử lý các tùy chọn cho câu hỏi trắc nghiệm
+                    if (in_array($question['type'], ['multiple_choice', 'checkbox']) && isset($question['options'])) {
+                        $question['options'] = array_filter($question['options'], function($option) {
+                            return !empty($option);
+                        });
+                    } else {
+                        $question['options'] = [];
+                    }
+                    
+                    $filteredQuestions[] = $question;
+                }
+            }
+            
+            $assignment->questions = $filteredQuestions;
+        }
+        
+        $assignment->save();
+        
+        return redirect()->route('assignments.show', $assignment)
             ->with('success', 'Bài tập đã được tạo thành công');
     }
 
@@ -57,7 +101,7 @@ class AssignmentController extends Controller
         $course = $lesson->course;
         
         // Check if user is enrolled or is the teacher
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             $isEnrolled = $course->students()->where('user_id', Auth::id())->exists();
             
             if (!$isEnrolled) {
@@ -87,7 +131,7 @@ class AssignmentController extends Controller
         $lesson = $assignment->lesson;
         $course = $lesson->course;
         
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('assignments.show', $assignment)
                 ->with('error', 'Bạn không có quyền chỉnh sửa bài tập này');
         }
@@ -103,7 +147,7 @@ class AssignmentController extends Controller
         $lesson = $assignment->lesson;
         $course = $lesson->course;
         
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('assignments.show', $assignment)
                 ->with('error', 'Bạn không có quyền chỉnh sửa bài tập này');
         }
@@ -128,7 +172,7 @@ class AssignmentController extends Controller
         $lesson = $assignment->lesson;
         $course = $lesson->course;
         
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('assignments.show', $assignment)
                 ->with('error', 'Bạn không có quyền xóa bài tập này');
         }
@@ -147,7 +191,7 @@ class AssignmentController extends Controller
         $lesson = $assignment->lesson;
         $course = $lesson->course;
         
-        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+        if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('assignments.show', $assignment)
                 ->with('error', 'Bạn không có quyền xem danh sách bài nộp');
         }

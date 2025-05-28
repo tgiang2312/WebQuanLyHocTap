@@ -14,13 +14,21 @@ class Submission extends Model
         'user_id',
         'content',
         'file_url',
+        'file_path',
+        'file_name',
         'grade',
+        'score',
         'feedback',
         'submitted_at',
+        'graded_at',
+        'status',
+        'is_late',
     ];
 
     protected $casts = [
         'submitted_at' => 'datetime',
+        'graded_at' => 'datetime',
+        'is_late' => 'boolean',
     ];
 
     // Relationship with assignment

@@ -15,10 +15,15 @@ class Assignment extends Model
         'title',
         'description',
         'due_date',
+        'max_score',
+        'questions',
+        'is_form',
     ];
 
     protected $casts = [
         'due_date' => 'datetime',
+        'questions' => 'array',
+        'is_form' => 'boolean',
     ];
 
     // Relationship with lesson

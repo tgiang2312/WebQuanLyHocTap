@@ -44,7 +44,7 @@ class LessonController extends Controller
         $lesson->title = $validated['title'];
         $lesson->content = $validated['content'];
         $lesson->video_url = $validated['video_url'] ?? null;
-        $lesson->order = $validated['order'] ?? $course->lessons()->count() + 1;
+        $lesson->order_number = $validated['order'] ?? $course->lessons()->count() + 1;
         $lesson->course_id = $course->id;
         
         // Xử lý file đính kèm
@@ -91,13 +91,13 @@ class LessonController extends Controller
         }
         
         $nextLesson = $course->lessons()
-            ->where('order', '>', $lesson->order)
-            ->orderBy('order')
+            ->where('order_number', '>', $lesson->order_number)
+            ->orderBy('order_number')
             ->first();
             
         $prevLesson = $course->lessons()
-            ->where('order', '<', $lesson->order)
-            ->orderByDesc('order')
+            ->where('order_number', '<', $lesson->order_number)
+            ->orderByDesc('order_number')
             ->first();
             
         return view('lessons.show', compact('lesson', 'course', 'nextLesson', 'prevLesson', 'isEnrolled', 'progress'));
@@ -136,7 +136,7 @@ class LessonController extends Controller
         $lesson->title = $validated['title'];
         $lesson->content = $validated['content'];
         $lesson->video_url = $validated['video_url'] ?? null;
-        $lesson->order = $validated['order'] ?? $lesson->order;
+        $lesson->order_number = $validated['order'] ?? $lesson->order_number;
         
         // Xử lý file đính kèm
         if ($request->hasFile('files')) {
@@ -195,7 +195,7 @@ class LessonController extends Controller
         $lesson->delete();
         
         // Cập nhật thứ tự các bài học còn lại
-        $course->lessons()->where('order', '>', $lesson->order)->decrement('order');
+        $course->lessons()->where('order_number', '>', $lesson->order_number)->decrement('order_number');
         
         return redirect()->route('courses.show', $course)->with('success', 'Bài học đã được xóa thành công!');
     }
@@ -218,7 +218,7 @@ class LessonController extends Controller
         foreach ($validated['lessons'] as $lessonData) {
             $lesson = Lesson::find($lessonData['id']);
             if ($lesson && $lesson->course_id == $course->id) {
-                $lesson->order = $lessonData['order'];
+                $lesson->order_number = $lessonData['order'];
                 $lesson->save();
             }
         }
