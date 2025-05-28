@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->morphs('commentable'); // Cho phép comment trên nhiều loại đối tượng (lessons, courses, v.v.)
             $table->text('content');
-            $table->foreignId('parent_id')->nullable()->references('id')->on('comments')->onDelete('cascade'); // Cho phép trả lời comment
+            $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade'); // Cho phép trả lời comment
             $table->timestamps();
         });
     }

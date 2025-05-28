@@ -61,10 +61,10 @@
                             <form action="{{ route('login') }}" method="POST">
                                 @csrf
                                 <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
+                                    <label for="login" class="form-label">Tài khoản hoặc Email</label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="name@example.com" required>
+                                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                        <input type="text" class="form-control" id="login" name="login" value="{{ old('login') }}" placeholder="Tên tài khoản hoặc email" required>
                                     </div>
                                 </div>
                                 
@@ -117,6 +117,15 @@
                                         <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
                                         <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Nguyễn Văn A" required>
                                     </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Tài khoản</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
+                                        <input type="text" class="form-control" id="username" name="username" value="{{ old('username') }}" placeholder="username" required>
+                                    </div>
+                                    <div class="form-text">Tài khoản chỉ chứa chữ cái, số và dấu gạch dưới</div>
                                 </div>
                                 
                                 <div class="mb-3">

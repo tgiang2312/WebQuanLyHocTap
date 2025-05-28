@@ -39,7 +39,71 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Dashboard
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    // Dữ liệu mẫu cho khóa học đã đăng ký
+    $enrolledCourses = [
+        [
+            'id' => 1,
+            'title' => 'Lập trình PHP cơ bản',
+            'instructor' => 'Nguyễn Văn A',
+            'category' => 'Lập trình',
+            'progress' => 75,
+            'lastLesson' => 'Bài 8: Làm việc với Database',
+            'image' => 'images/courses/php.jpg',
+            'completed' => false
+        ],
+        [
+            'id' => 2,
+            'title' => 'JavaScript nâng cao',
+            'instructor' => 'Trần Thị B',
+            'category' => 'Web',
+            'progress' => 40,
+            'lastLesson' => 'Bài 4: Promises và Async/Await',
+            'image' => 'images/courses/js.jpg',
+            'completed' => false
+        ],
+        [
+            'id' => 3,
+            'title' => 'HTML & CSS cơ bản',
+            'instructor' => 'Lê Văn C',
+            'category' => 'Web',
+            'progress' => 100,
+            'lastLesson' => 'Bài 10: Responsive Design',
+            'image' => 'images/courses/html.jpg',
+            'completed' => true
+        ]
+    ];
+    
+    // Dữ liệu mẫu cho bài tập sắp đến hạn
+    $upcomingAssignments = [
+        [
+            'id' => 1,
+            'title' => 'Xây dựng trang web portfolio',
+            'course' => 'HTML & CSS cơ bản',
+            'dueDate' => now()->addDays(3)
+        ],
+        [
+            'id' => 2,
+            'title' => 'Tạo ứng dụng Todo List',
+            'course' => 'JavaScript nâng cao',
+            'dueDate' => now()->addDays(5)
+        ]
+    ];
+    
+    // Dữ liệu mẫu cho thành tích
+    $achievements = [
+        [
+            'icon' => '🏆',
+            'title' => 'Hoàn thành khóa học đầu tiên',
+            'date' => now()->subDays(10)
+        ],
+        [
+            'icon' => '⭐',
+            'title' => 'Nộp 5 bài tập đúng hạn',
+            'date' => now()->subDays(5)
+        ]
+    ];
+    
+    return view('dashboard', compact('enrolledCourses', 'upcomingAssignments', 'achievements'));
 })->middleware('auth')->name('dashboard');
 
 // Course routes
@@ -102,3 +166,8 @@ Route::get('/contact', function () {
 
 Route::get('auth/{provider}', [LoginController::class, 'redirectToProvider']);
 Route::get('auth/{provider}/callback', [LoginController::class, 'handleProviderCallback']);
+
+// Profile routes
+Route::get('/profile', function () {
+    return view('profile');
+})->middleware('auth')->name('profile.show');

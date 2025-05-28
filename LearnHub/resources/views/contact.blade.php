@@ -24,7 +24,7 @@
                         </div>
                         <div>
                             <h5 class="fw-semibold">Địa chỉ</h5>
-                            <p class="text-muted mb-0">Tòa nhà Innovation, 123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
+                            <p class="text-muted mb-0">Tòa nhà XXX, 123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
                         </div>
                     </div>
                     
