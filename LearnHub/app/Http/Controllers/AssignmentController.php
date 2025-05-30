@@ -33,6 +33,7 @@ class AssignmentController extends Controller
     {
         $course = $lesson->course;
         
+        // Kiểm tra xem người dùng có quyền tạo bài tập không
         if (Auth::id() !== $course->teacher_id && Auth::user()->role !== 'admin') {
             return redirect()->route('lessons.show', $lesson)
                 ->with('error', 'Bạn không có quyền tạo bài tập');
@@ -43,7 +44,6 @@ class AssignmentController extends Controller
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
             'max_score' => 'required|integer|min:1|max:100',
-            'is_form' => 'required|boolean',
         ]);
         
         // Tạo bài tập cơ bản
@@ -54,67 +54,55 @@ class AssignmentController extends Controller
         $assignment->description = $validated['description'];
         $assignment->due_date = $validated['due_date'];
         $assignment->max_score = $validated['max_score'];
-        $assignment->is_form = $validated['is_form'];
+        $assignment->is_form = true; // Tất cả bài tập đều là dạng form
         
-        // Nếu là bài tập dạng form, lưu các câu hỏi
-        if ($validated['is_form']) {
-            $questions = $request->input('questions', []);
-            
-            // Loại bỏ các câu hỏi trống
-            $filteredQuestions = [];
-            foreach ($questions as $key => $question) {
-                if (!empty($question['text'])) {
-                    // Chuyển đổi từ text sang title
-                    $question['title'] = $question['text'];
-                    unset($question['text']);
-                    
-                    // Đảm bảo các trường cần thiết tồn tại
-                    $question['required'] = isset($question['required']) ? true : false;
-                    $question['points'] = $validated['max_score'] / count($questions); // Điểm mặc định cho mỗi câu hỏi
-                    
-                    // Xử lý các tùy chọn cho câu hỏi trắc nghiệm
-                    if (in_array($question['type'], ['multiple_choice', 'checkbox']) && isset($question['options'])) {
-                        $question['options'] = array_filter($question['options'], function($option) {
-                            return !empty($option);
-                        });
-                    } else {
-                        $question['options'] = [];
-                    }
-                    
-                    $filteredQuestions[] = $question;
+        // Lưu các câu hỏi
+        $questions = $request->input('questions', []);
+        
+        // Loại bỏ các câu hỏi trống
+        $filteredQuestions = [];
+        foreach ($questions as $key => $question) {
+            if (!empty($question['text'])) {
+                // Chuyển đổi từ text sang title
+                $question['title'] = $question['text'];
+                unset($question['text']);
+                
+                // Đảm bảo các trường cần thiết tồn tại
+                $question['required'] = isset($question['required']) ? true : false;
+                
+                // Nếu có nhiều câu hỏi, chia điểm đều
+                if (count($questions) > 0) {
+                    $question['points'] = $validated['max_score'] / count($questions);
+                } else {
+                    $question['points'] = $validated['max_score'];
                 }
+                
+                // Xử lý các tùy chọn cho câu hỏi trắc nghiệm
+                if (in_array($question['type'], ['multiple_choice', 'checkbox']) && isset($question['options'])) {
+                    $question['options'] = array_filter($question['options'], function($option) {
+                        return !empty($option);
+                    });
+                } else {
+                    $question['options'] = [];
+                }
+                
+                $filteredQuestions[] = $question;
             }
-            
-            $assignment->questions = $filteredQuestions;
         }
         
+        $assignment->questions = $filteredQuestions;
         $assignment->save();
-        
-        // Lưu thông tin bài nộp
-        $submission = new Submission();
-        $submission->assignment_id = $assignment->id;
-        $submission->user_id = Auth::id();
-        $submission->content = $request->content;
-        $submission->status = 'submitted';
-        $submission->submitted_at = now();
-        
-        // Kiểm tra nếu nộp muộn
-        if ($assignment->due_date && now() > $assignment->due_date) {
-            $submission->is_late = true;
-        }
-        
-        $submission->save();
         
         // Ghi lại hoạt động
         Activity::log(
             Auth::id(),
-            'submission',
-            'Đã nộp bài tập: ' . $assignment->title,
+            'assignment',
+            'Đã tạo bài tập: ' . $assignment->title,
             null,
             $assignment->course_id
         );
         
-        return redirect()->route('assignments.show', $assignment)
+        return redirect()->route('lessons.show', $lesson)
             ->with('success', 'Bài tập đã được tạo thành công');
     }
 

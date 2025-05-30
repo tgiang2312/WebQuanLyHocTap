@@ -84,160 +84,88 @@
                         </div>
                     @endif
                     
-                    <!-- Loại bài tập tabs -->
-                    <ul class="nav nav-pills mb-4" id="assignmentTypeTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="regular-tab" data-bs-toggle="pill" data-bs-target="#regular-tab-pane" type="button" role="tab" aria-controls="regular-tab-pane" aria-selected="true">
-                                <i class="bi bi-file-text me-2"></i> Bài tập thông thường
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="form-tab" data-bs-toggle="pill" data-bs-target="#form-tab-pane" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="false">
-                                <i class="bi bi-list-check me-2"></i> Bài tập dạng form
-                            </button>
-                        </li>
-                    </ul>
-                    
-                    <div class="tab-content" id="assignmentTypeTabContent">
-                        <!-- Bài tập thông thường -->
-                        <div class="tab-pane fade show active" id="regular-tab-pane" role="tabpanel" 
-                             aria-labelledby="regular-tab" tabindex="0">
-                            <form action="{{ route('teachers.assignments.store') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="is_form" value="0">
-                                
-                                <div class="mb-4">
-                                    <label for="title" class="form-label fw-semibold">Tiêu đề bài tập <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="title" name="title" value="{{ old('title') }}" required>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="course_id" class="form-label fw-semibold">Khóa học <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="course_id" name="course_id" required>
-                                        <option value="" selected disabled>Chọn khóa học</option>
-                                        @foreach($courses as $course)
-                                            <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>{{ $course->title }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="description" class="form-label fw-semibold">Mô tả bài tập <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="description" name="description" rows="6" required>{{ old('description') }}</textarea>
-                                    <div class="form-text">Mô tả chi tiết yêu cầu bài tập</div>
-                                </div>
-                                
-                                <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="due_date" class="form-label fw-semibold">Thời hạn nộp bài <span class="text-danger">*</span></label>
-                                            <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="{{ old('due_date') }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="max_score" class="form-label fw-semibold">Điểm tối đa <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" id="max_score" name="max_score" value="{{ old('max_score', 10) }}" min="0" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="alert alert-info mb-4">
-                                    <div class="d-flex">
-                                        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-                                        <div>
-                                            <h5 class="fw-semibold">Lưu ý khi tạo bài tập:</h5>
-                                            <ul class="mb-0">
-                                                <li>Bài tập sẽ được gửi cho tất cả học viên đã đăng ký khóa học</li>
-                                                <li>Học viên có thể nộp bài tập sau thời hạn, nhưng sẽ được đánh dấu là nộp muộn</li>
-                                                <li>Bạn có thể chỉnh sửa thông tin bài tập bất cứ lúc nào</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-flex justify-content-end gap-3">
-                                    <a href="{{ route('teachers.assignments') }}" class="btn btn-secondary">Hủy</a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-plus-circle me-2"></i> Tạo bài tập
-                                    </button>
-                                </div>
-                            </form>
+                    <form id="assignmentForm" action="{{ route('teachers.assignments.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="is_form" value="1">
+                        
+                        <!-- Form Header -->
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-semibold">Tiêu đề bài tập <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ old('title') }}" required>
                         </div>
                         
-                        <!-- Bài tập dạng form -->
-                        <div class="tab-pane fade" id="form-tab-pane" role="tabpanel" 
-                             aria-labelledby="form-tab" tabindex="0">
-                             <form id="formAssignmentForm" action="{{ route('teachers.assignments.store_form') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="is_form" value="1">
-                                
-                                <!-- Form Header -->
-                                <div class="mb-4">
-                                    <label for="form_title" class="form-label fw-semibold">Tiêu đề bài tập <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="form_title" name="title" value="{{ old('title') }}" required>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="form_course_id" class="form-label fw-semibold">Khóa học <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="form_course_id" name="course_id" required>
-                                        <option value="" selected disabled>Chọn khóa học</option>
-                                        @foreach($courses as $course)
-                                            <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>{{ $course->title }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="form_description" class="form-label fw-semibold">Mô tả bài tập <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="form_description" name="description" rows="5" required>{{ old('description') }}</textarea>
-                                </div>
-                                
-                                <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="form_due_date" class="form-label fw-semibold">Thời hạn nộp bài <span class="text-danger">*</span></label>
-                                            <input type="datetime-local" class="form-control" id="form_due_date" name="due_date" value="{{ old('due_date') }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="form_max_score" class="form-label fw-semibold">Điểm tối đa <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" id="form_max_score" name="max_score" value="{{ old('max_score', 10) }}" min="0" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Questions Container -->
-                                <div id="questionsContainer">
-                                    <!-- Questions will be added here dynamically -->
-                                </div>
-                                
-                                <!-- Add Question Button -->
-                                <div class="mb-4">
-                                    <div class="dropdown">
-                                        <button class="btn btn-primary dropdown-toggle" type="button" id="addQuestionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-plus-circle me-2"></i> Thêm câu hỏi
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="addQuestionDropdown">
-                                            <li><a class="dropdown-item" href="#" onclick="addQuestion('multiple_choice')"><i class="bi bi-list-check me-2"></i> Trắc nghiệm (một đáp án)</a></li>
-                                            <li><a class="dropdown-item" href="#" onclick="addQuestion('checkbox')"><i class="bi bi-check-square me-2"></i> Trắc nghiệm (nhiều đáp án)</a></li>
-                                            <li><a class="dropdown-item" href="#" onclick="addQuestion('short_answer')"><i class="bi bi-input-cursor-text me-2"></i> Câu trả lời ngắn</a></li>
-                                            <li><a class="dropdown-item" href="#" onclick="addQuestion('paragraph')"><i class="bi bi-text-paragraph me-2"></i> Đoạn văn</a></li>
-                                            <li><a class="dropdown-item" href="#" onclick="addQuestion('file_upload')"><i class="bi bi-file-earmark-arrow-up me-2"></i> Tải lên tệp</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                
-                                <div class="d-flex justify-content-between">
-                                    <a href="{{ route('teachers.assignments') }}" class="btn btn-secondary">Hủy</a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-2"></i> Tạo bài tập
-                                    </button>
-                                </div>
-                             </form>
+                        <div class="mb-4">
+                            <label for="course_id" class="form-label fw-semibold">Khóa học <span class="text-danger">*</span></label>
+                            <select class="form-select" id="course_id" name="course_id" required>
+                                <option value="" selected disabled>Chọn khóa học</option>
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>{{ $course->title }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                    </div>
+                        
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-semibold">Mô tả bài tập <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required>{{ old('description') }}</textarea>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="due_date" class="form-label fw-semibold">Thời hạn nộp bài <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="{{ old('due_date') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="max_score" class="form-label fw-semibold">Điểm tối đa <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="max_score" name="max_score" value="{{ old('max_score', 10) }}" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Questions Container -->
+                        <div id="questionsContainer">
+                            <!-- Questions will be added here dynamically -->
+                        </div>
+                        
+                        <!-- Add Question Button -->
+                        <div class="mb-4">
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="addQuestionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-plus-circle me-2"></i> Thêm câu hỏi
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="addQuestionDropdown">
+                                    <li><a class="dropdown-item" href="#" onclick="addQuestion('multiple_choice')"><i class="bi bi-list-check me-2"></i> Trắc nghiệm (một đáp án)</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="addQuestion('checkbox')"><i class="bi bi-check-square me-2"></i> Trắc nghiệm (nhiều đáp án)</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="addQuestion('short_answer')"><i class="bi bi-input-cursor-text me-2"></i> Câu trả lời ngắn</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="addQuestion('paragraph')"><i class="bi bi-text-paragraph me-2"></i> Đoạn văn</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="addQuestion('file_upload')"><i class="bi bi-file-earmark-arrow-up me-2"></i> Tải lên tệp</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex">
+                                <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                                <div>
+                                    <h5 class="fw-semibold">Lưu ý khi tạo bài tập:</h5>
+                                    <ul class="mb-0">
+                                        <li>Bài tập sẽ được gửi cho tất cả học viên đã đăng ký khóa học</li>
+                                        <li>Học viên có thể nộp bài tập sau thời hạn, nhưng sẽ được đánh dấu là nộp muộn</li>
+                                        <li>Bạn có thể chỉnh sửa thông tin bài tập bất cứ lúc nào</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{{ route('teachers.assignments') }}" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i> Tạo bài tập
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -580,7 +508,7 @@
         });
         
         // Form validation before submit
-        document.getElementById('formAssignmentForm').addEventListener('submit', function(e) {
+        document.getElementById('assignmentForm').addEventListener('submit', function(e) {
             const questions = document.querySelectorAll('.question-card');
             
             if (questions.length === 0) {

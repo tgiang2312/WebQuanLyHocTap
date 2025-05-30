@@ -28,109 +28,49 @@
                         </div>
                     @endif
                     
-                    <ul class="nav nav-tabs mb-4" id="assignmentTypeTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="regular-tab" data-bs-toggle="tab" 
-                                    data-bs-target="#regular-tab-pane" type="button" role="tab" 
-                                    aria-controls="regular-tab-pane" aria-selected="true">
-                                Bài tập thông thường
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="form-tab" data-bs-toggle="tab" 
-                                    data-bs-target="#form-tab-pane" type="button" role="tab" 
-                                    aria-controls="form-tab-pane" aria-selected="false">
-                                Bài tập dạng form
-                            </button>
-                        </li>
-                    </ul>
-                    
-                    <div class="tab-content" id="assignmentTypeTabContent">
-                        <!-- Bài tập thông thường -->
-                        <div class="tab-pane fade show active" id="regular-tab-pane" role="tabpanel" 
-                             aria-labelledby="regular-tab" tabindex="0">
-                            <form action="{{ route('assignments.store', $lesson) }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="is_form" value="0">
-                                
-                                <div class="mb-4">
-                                    <label for="title" class="form-label fw-semibold">Tiêu đề bài tập <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="title" name="title" value="{{ old('title') }}" required>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="description" class="form-label fw-semibold">Mô tả bài tập</label>
-                                    <textarea class="form-control" id="description" name="description" rows="5">{{ old('description') }}</textarea>
-                                    <div class="form-text">Mô tả chi tiết về bài tập, yêu cầu, hướng dẫn, v.v.</div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="due_date" class="form-label fw-semibold">Hạn nộp bài</label>
-                                    <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="{{ old('due_date') }}">
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="max_score" class="form-label fw-semibold">Điểm tối đa</label>
-                                    <input type="number" class="form-control" id="max_score" name="max_score" value="{{ old('max_score', 10) }}" min="1" max="100">
-                                </div>
-                                
-                                <div class="d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-2"></i> Tạo bài tập
-                                    </button>
-                                </div>
-                            </form>
+                    <form action="{{ route('assignments.store', $lesson) }}" method="POST" id="assignmentForm">
+                        @csrf
+                        
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-semibold">Tiêu đề bài tập <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ old('title') }}" required>
                         </div>
                         
-                        <!-- Bài tập dạng form -->
-                        <div class="tab-pane fade" id="form-tab-pane" role="tabpanel" 
-                             aria-labelledby="form-tab" tabindex="0">
-                            <form action="{{ route('assignments.store', $lesson) }}" method="POST" id="formAssignmentForm">
-                                @csrf
-                                <input type="hidden" name="is_form" value="1">
-                                
-                                <div class="mb-4">
-                                    <label for="form_title" class="form-label fw-semibold">Tiêu đề bài tập <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="form_title" name="title" value="{{ old('title') }}" required>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="form_description" class="form-label fw-semibold">Mô tả bài tập</label>
-                                    <textarea class="form-control" id="form_description" name="description" rows="5">{{ old('description') }}</textarea>
-                                    <div class="form-text">Mô tả chi tiết về bài tập, yêu cầu, hướng dẫn, v.v.</div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="form_due_date" class="form-label fw-semibold">Hạn nộp bài</label>
-                                    <input type="datetime-local" class="form-control" id="form_due_date" name="due_date" value="{{ old('due_date') }}">
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="form_max_score" class="form-label fw-semibold">Điểm tối đa</label>
-                                    <input type="number" class="form-control" id="form_max_score" name="max_score" value="{{ old('max_score', 10) }}" min="1" max="100">
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold">Câu hỏi</label>
-                                    <div class="form-text mb-3">Tạo các câu hỏi cho bài tập dạng form.</div>
-                                    
-                                    <div id="questions-container">
-                                        <!-- Các câu hỏi sẽ được thêm vào đây -->
-                                    </div>
-                                    
-                                    <button type="button" class="btn btn-outline-primary mt-3" id="add-question">
-                                        <i class="bi bi-plus-circle me-2"></i> Thêm câu hỏi
-                                    </button>
-                                </div>
-                                
-                                <div class="d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-2"></i> Tạo bài tập
-                                    </button>
-                                </div>
-                            </form>
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-semibold">Mô tả bài tập</label>
+                            <textarea class="form-control" id="description" name="description" rows="5">{{ old('description') }}</textarea>
+                            <div class="form-text">Mô tả chi tiết về bài tập, yêu cầu, hướng dẫn, v.v.</div>
                         </div>
-                    </div>
+                        
+                        <div class="mb-4">
+                            <label for="due_date" class="form-label fw-semibold">Hạn nộp bài</label>
+                            <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="{{ old('due_date') }}">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="max_score" class="form-label fw-semibold">Điểm tối đa</label>
+                            <input type="number" class="form-control" id="max_score" name="max_score" value="{{ old('max_score', 10) }}" min="1" max="100">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Câu hỏi</label>
+                            <div class="form-text mb-3">Tạo các câu hỏi cho bài tập.</div>
+                            
+                            <div id="questions-container">
+                                <!-- Các câu hỏi sẽ được thêm vào đây -->
+                            </div>
+                            
+                            <button type="button" class="btn btn-outline-primary mt-3" id="add-question">
+                                <i class="bi bi-plus-circle me-2"></i> Thêm câu hỏi
+                            </button>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i> Tạo bài tập
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -249,6 +189,19 @@
                 addOption(optionsList, questionNumber);
             });
             
+            // Xử lý sự kiện xóa lựa chọn
+            const removeOptionBtns = questionItem.querySelectorAll('.remove-option');
+            removeOptionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const optionsList = this.closest('.options-list');
+                    if (optionsList.children.length > 2) {
+                        this.closest('.input-group').remove();
+                    } else {
+                        alert('Cần có ít nhất 2 lựa chọn cho câu hỏi trắc nghiệm');
+                    }
+                });
+            });
+            
             questionsContainer.appendChild(questionItem);
         }
         
@@ -264,39 +217,47 @@
             `;
             
             optionItem.querySelector('.remove-option').addEventListener('click', function() {
-                this.closest('.input-group').remove();
+                const optionsList = this.closest('.options-list');
+                if (optionsList.children.length > 2) {
+                    this.closest('.input-group').remove();
+                } else {
+                    alert('Cần có ít nhất 2 lựa chọn cho câu hỏi trắc nghiệm');
+                }
             });
             
             optionsList.appendChild(optionItem);
         }
         
-        // Cập nhật số thứ tự câu hỏi
+        // Hàm cập nhật số thứ tự câu hỏi
         function updateQuestionNumbers() {
             const questionItems = document.querySelectorAll('.question-item');
             questionItems.forEach((item, index) => {
                 const questionNumber = index + 1;
                 item.querySelector('.question-number').textContent = questionNumber;
+                
+                // Cập nhật name
                 item.querySelector('.question-text').name = `questions[${questionNumber}][text]`;
                 item.querySelector('.question-type').name = `questions[${questionNumber}][type]`;
                 item.querySelector('.form-check-input').name = `questions[${questionNumber}][required]`;
                 item.querySelector('.form-check-input').id = `question-required-${questionNumber}`;
                 item.querySelector('.form-check-label').setAttribute('for', `question-required-${questionNumber}`);
                 
-                // Cập nhật name cho các lựa chọn
-                const optionInputs = item.querySelectorAll('.options-list input');
-                optionInputs.forEach(input => {
-                    input.name = `questions[${questionNumber}][options][]`;
+                // Cập nhật name cho các options
+                const options = item.querySelectorAll('.options-list input');
+                options.forEach(option => {
+                    option.name = `questions[${questionNumber}][options][]`;
                 });
             });
         }
         
-        // Validate form trước khi submit
-        document.getElementById('formAssignmentForm').addEventListener('submit', function(event) {
-            const questionItems = document.querySelectorAll('.question-item');
-            if (questionItems.length === 0) {
-                event.preventDefault();
-                alert('Vui lòng thêm ít nhất một câu hỏi cho bài tập.');
-            }
+        // Xử lý khi submit form
+        document.getElementById('assignmentForm').addEventListener('submit', function(e) {
+            // Thêm trường ẩn is_form với giá trị 1
+            const isFormInput = document.createElement('input');
+            isFormInput.type = 'hidden';
+            isFormInput.name = 'is_form';
+            isFormInput.value = '1';
+            this.appendChild(isFormInput);
         });
     });
 </script>
