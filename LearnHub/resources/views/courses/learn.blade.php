@@ -5,20 +5,20 @@
 @section('content')
 <div class="container-fluid p-0">
     <div class="row g-0">
-        <!-- Sidebar danh sách bài học -->
-        <div class="col-lg-3 col-md-4 bg-light sidebar-lessons" style="height: calc(100vh - 60px); overflow-y: auto;">
-            <div class="p-4">
+        <!-- Sidebar bài học -->
+        <div class="col-lg-3 col-md-4 bg-light sidebar-fixed-height responsive-sidebar">
+            <div class="p-3">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold mb-0">{{ $course->title }}</h5>
+                    <h5 class="fw-bold mb-0">Nội dung khóa học</h5>
                     <button class="btn btn-sm btn-outline-secondary d-md-none" id="closeSidebar">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
                 
-                <div class="progress mb-3" style="height: 8px;">
+                <div class="progress-md mb-3">
                     <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $progress }}%;" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                <p class="text-muted small mb-4">{{ $progress }}% hoàn thành</p>
+                <p class="small text-muted mb-4">Hoàn thành: {{ $progress }}%</p>
                 
                 <div class="list-group list-group-flush">
                     @foreach($lessons as $lesson)
@@ -49,10 +49,10 @@
         </div>
         
         <!-- Nội dung bài học -->
-        <div class="col-lg-9 col-md-8 main-content" style="height: calc(100vh - 60px); overflow-y: auto;">
+        <div class="col-lg-9 col-md-8 main-content-fixed-height">
             <div class="p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <button class="btn btn-sm btn-outline-primary d-md-none" id="openSidebar">
+                    <button class="btn btn-sm btn-outline-primary d-md-none sidebar-toggler" data-target=".responsive-sidebar">
                         <i class="bi bi-list"></i> Danh sách bài học
                     </button>
                     <a href="{{ route('courses.show', $course) }}" class="btn btn-sm btn-outline-secondary">
@@ -66,7 +66,7 @@
                             <h4 class="fw-bold mb-0">{{ $currentLesson->title }}</h4>
                         </div>
                         <div class="card-body">
-                            <div class="lesson-content mb-4">
+                            <div class="lesson-content mb-4 content-area">
                                 {!! $currentLesson->content !!}
                             </div>
                             
@@ -177,49 +177,5 @@
 @endsection
 
 @section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Xử lý hiển thị/ẩn sidebar trên mobile
-        const openSidebarBtn = document.getElementById('openSidebar');
-        const closeSidebarBtn = document.getElementById('closeSidebar');
-        const sidebar = document.querySelector('.sidebar-lessons');
-        
-        if (openSidebarBtn && closeSidebarBtn) {
-            openSidebarBtn.addEventListener('click', function() {
-                sidebar.classList.add('show');
-                sidebar.style.transform = 'translateX(0)';
-            });
-            
-            closeSidebarBtn.addEventListener('click', function() {
-                sidebar.classList.remove('show');
-                sidebar.style.transform = 'translateX(-100%)';
-            });
-        }
-    });
-</script>
-@endsection
-
-@section('styles')
-<style>
-    @media (max-width: 767.98px) {
-        .sidebar-lessons {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            width: 80%;
-            z-index: 1030;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        .sidebar-lessons.show {
-            transform: translateX(0);
-        }
-    }
-    
-    .lesson-content img {
-        max-width: 100%;
-        height: auto;
-    }
-</style>
+<!-- No additional scripts needed, common.js handles the sidebar functionality -->
 @endsection 

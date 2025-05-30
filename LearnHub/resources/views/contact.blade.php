@@ -19,8 +19,8 @@
                     <h3 class="fw-bold mb-4">Thông tin liên hệ</h3>
                     
                     <div class="d-flex mb-4">
-                        <div class="flex-shrink-0 me-3 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle" style="width: 50px; height: 50px;">
-                            <i class="bi bi-geo-alt text-primary fs-4"></i>
+                        <div class="icon-circle icon-circle-lg icon-circle-primary me-3">
+                            <i class="bi bi-geo-alt fs-4"></i>
                         </div>
                         <div>
                             <h5 class="fw-semibold">Địa chỉ</h5>
@@ -29,8 +29,8 @@
                     </div>
                     
                     <div class="d-flex mb-4">
-                        <div class="flex-shrink-0 me-3 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle" style="width: 50px; height: 50px;">
-                            <i class="bi bi-envelope text-primary fs-4"></i>
+                        <div class="icon-circle icon-circle-lg icon-circle-primary me-3">
+                            <i class="bi bi-envelope fs-4"></i>
                         </div>
                         <div>
                             <h5 class="fw-semibold">Email</h5>
@@ -40,8 +40,8 @@
                     </div>
                     
                     <div class="d-flex mb-4">
-                        <div class="flex-shrink-0 me-3 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle" style="width: 50px; height: 50px;">
-                            <i class="bi bi-telephone text-primary fs-4"></i>
+                        <div class="icon-circle icon-circle-lg icon-circle-primary me-3">
+                            <i class="bi bi-telephone fs-4"></i>
                         </div>
                         <div>
                             <h5 class="fw-semibold">Điện thoại</h5>
@@ -51,8 +51,8 @@
                     </div>
                     
                     <div class="d-flex">
-                        <div class="flex-shrink-0 me-3 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle" style="width: 50px; height: 50px;">
-                            <i class="bi bi-clock text-primary fs-4"></i>
+                        <div class="icon-circle icon-circle-lg icon-circle-primary me-3">
+                            <i class="bi bi-clock fs-4"></i>
                         </div>
                         <div>
                             <h5 class="fw-semibold">Giờ làm việc</h5>
@@ -65,19 +65,19 @@
                     
                     <h4 class="fw-semibold mb-3">Kết nối với chúng tôi</h4>
                     <div class="d-flex gap-3">
-                        <a href="#" class="btn btn-outline-primary rounded-circle" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                        <a href="#" class="social-btn btn-outline-primary">
                             <i class="bi bi-facebook"></i>
                         </a>
-                        <a href="#" class="btn btn-outline-info rounded-circle" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                        <a href="#" class="social-btn btn-outline-info">
                             <i class="bi bi-twitter"></i>
                         </a>
-                        <a href="#" class="btn btn-outline-danger rounded-circle" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                        <a href="#" class="social-btn btn-outline-danger">
                             <i class="bi bi-youtube"></i>
                         </a>
-                        <a href="#" class="btn btn-outline-primary rounded-circle" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                        <a href="#" class="social-btn btn-outline-primary">
                             <i class="bi bi-linkedin"></i>
                         </a>
-                        <a href="#" class="btn btn-outline-success rounded-circle" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                        <a href="#" class="social-btn btn-outline-success">
                             <i class="bi bi-whatsapp"></i>
                         </a>
                     </div>
@@ -92,16 +92,18 @@
                     <h3 class="fw-bold mb-4">Gửi tin nhắn cho chúng tôi</h3>
                     <p class="text-muted mb-4">Vui lòng điền đầy đủ thông tin bên dưới, chúng tôi sẽ liên hệ lại với bạn trong thời gian sớm nhất</p>
                     
-                    <form action="#" method="POST">
+                    <form action="#" method="POST" class="needs-validation" novalidate>
                         @csrf
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="name" class="form-label">Họ và tên</label>
                                 <input type="text" class="form-control" id="name" name="name" required>
+                                <div class="invalid-feedback">Vui lòng nhập họ tên của bạn</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" required>
+                                <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="phone" class="form-label">Số điện thoại</label>
@@ -118,10 +120,12 @@
                                     <option value="partnership">Hợp tác</option>
                                     <option value="other">Khác</option>
                                 </select>
+                                <div class="invalid-feedback">Vui lòng chọn chủ đề liên hệ</div>
                             </div>
                             <div class="col-12">
                                 <label for="message" class="form-label">Nội dung tin nhắn</label>
                                 <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                                <div class="invalid-feedback">Vui lòng nhập nội dung tin nhắn</div>
                             </div>
                             <div class="col-12">
                                 <div class="form-check">
@@ -129,6 +133,7 @@
                                     <label class="form-check-label" for="privacy">
                                         Tôi đồng ý với <a href="#" class="text-decoration-none">chính sách bảo mật</a> của LearnHub
                                     </label>
+                                    <div class="invalid-feedback">Bạn cần đồng ý với điều khoản của chúng tôi</div>
                                 </div>
                             </div>
                             <div class="col-12 mt-4">
@@ -151,7 +156,7 @@
                     <h3 class="fw-bold p-4 mb-0">Vị trí của chúng tôi</h3>
                     <div class="ratio ratio-21x9">
                         <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4241674198073!2d106.70236481474306!3d10.780091492318766!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f4a4b28425b%3A0xd2c89fc0493a25e9!2sNguy%E1%BB%85n%20Hu%E1%BB%87%20Walking%20Street!5e0!3m2!1sen!2s!4v1660051440357!5m2!1sen!2s" 
-                                style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                                allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
             </div>
@@ -198,20 +203,7 @@
                     </h2>
                     <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            LearnHub chấp nhận nhiều phương thức thanh toán khác nhau bao gồm thẻ tín dụng/ghi nợ (Visa, MasterCard, JCB), chuyển khoản ngân hàng, ví điện tử (MoMo, ZaloPay, VNPay) và thanh toán qua các cửa hàng tiện lợi.
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="accordion-item border rounded overflow-hidden">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                            Làm thế nào để yêu cầu hoàn tiền?
-                        </button>
-                    </h2>
-                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            Nếu bạn không hài lòng với khóa học, bạn có thể yêu cầu hoàn tiền trong vòng 7 ngày kể từ ngày đăng ký khóa học. Vui lòng liên hệ với bộ phận hỗ trợ khách hàng qua email support@learnhub.vn hoặc qua hotline 1800 1234 để được hướng dẫn cụ thể.
+                            LearnHub chấp nhận nhiều phương thức thanh toán khác nhau bao gồm thẻ tín dụng/ghi nợ (Visa, MasterCard, JCB), ví điện tử (MoMo, ZaloPay, VNPay), chuyển khoản ngân hàng và thanh toán qua ứng dụng ngân hàng di động. Chúng tôi luôn đảm bảo các giao dịch thanh toán được thực hiện an toàn và bảo mật.
                         </div>
                     </div>
                 </div>

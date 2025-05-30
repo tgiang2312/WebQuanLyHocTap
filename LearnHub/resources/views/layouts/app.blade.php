@@ -12,11 +12,22 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
-    <!-- Custom CSS -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    
     <!-- Animate.css for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Common CSS -->
+    <link rel="stylesheet" href="{{ asset('css/common.css') }}">
+    
+    <!-- Component CSS -->
+    <link rel="stylesheet" href="{{ asset('css/components/course-card.css') }}">
+    
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Page-specific CSS -->
+    @if(Route::is('home'))
+    <link rel="stylesheet" href="{{ asset('css/pages/home.css') }}">
+    @endif
     
     @yield('styles')
 </head>
@@ -37,8 +48,21 @@
     <!-- jQuery (required for some Bootstrap components) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <!-- Custom JavaScript -->
-    <script src="{{ asset('js/app.js') }}"></script>
+    <!-- GSAP Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <!-- Common JS -->
+    <script src="{{ asset('js/common.js') }}"></script>
+    
+    <!-- Page-specific JS -->
+    @if(Route::is('home'))
+    <script src="{{ asset('js/pages/home.js') }}"></script>
+    @endif
     
     @yield('scripts')
 </body>

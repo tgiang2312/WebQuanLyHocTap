@@ -1,12 +1,21 @@
 import './bootstrap';
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { initAllAnimations } from './animations';
+import '../css/footer.css';
+import './footer';
 
-function App() {
-    return <h1>Welcome to LearnHub (React + Laravel)</h1>;
+// Import CSS files thông qua JavaScript
+function importCss(cssFile) {
+    if (typeof document !== 'undefined') {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = cssFile;
+        document.head.appendChild(link);
+    }
 }
 
-const rootElement = document.getElementById('react-root');
-if (rootElement) {
-    createRoot(rootElement).render(<App />);
-}
+// Khởi chạy animations cho các phần tử không phải React
+document.addEventListener('DOMContentLoaded', () => {
+    initAllAnimations();
+    // Footer animations được xử lý trong file footer.js riêng biệt
+    // CSS có thể được import trực tiếp hoặc thông qua function
+});

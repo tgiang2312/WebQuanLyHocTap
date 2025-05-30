@@ -4,14 +4,14 @@
 
 @section('content')
 <div class="container py-5">
-    <div class="row mb-5">
+    <div class="row mb-5 animate-on-scroll">
         <div class="col-lg-8 mx-auto text-center">
-            <h1 class="fw-bold mb-3">Khóa học</h1>
+            <h1 class="fw-bold mb-3 gradient-text">Khóa học</h1>
             <p class="lead">Khám phá các khóa học chất lượng từ những giáo viên giàu kinh nghiệm</p>
             @auth
                 @if(Auth::user()->isTeacher() || Auth::user()->isAdmin())
-                <div class="mt-4">
-                    <a href="{{ route('courses.create') }}" class="btn btn-primary">
+                <div class="mt-4 fade-in">
+                    <a href="{{ route('courses.create') }}" class="btn btn-primary btn-animated">
                         <i class="bi bi-plus-circle me-2"></i> Tạo khóa học mới
                     </a>
                 </div>
@@ -23,9 +23,9 @@
     <!-- Search & Filter -->
     <div class="row mb-5">
         <div class="col-lg-8 mx-auto">
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm slide-left show">
                 <div class="card-body p-4">
-                    <h4 class="fw-bold mb-3">Tìm kiếm khóa học</h4>
+                    <h4 class="fw-bold mb-3 highlight">Tìm kiếm khóa học</h4>
                     <x-course-search :filters="['category', 'sort']" :show-advanced="true" />
                 </div>
             </div>
@@ -33,7 +33,7 @@
     </div>
     
     <!-- Course Categories -->
-    <div class="row mb-5">
+    <div class="row mb-5 animate-on-scroll">
         <div class="col-12">
             <h3 class="fw-bold mb-4">Danh mục khóa học</h3>
             <x-category-list display-type="grid" />
@@ -41,19 +41,21 @@
     </div>
     
     <!-- Course Listings -->
-    <div class="row mb-4">
+    <div class="row mb-4 animate-on-scroll">
         <div class="col-12">
             <h3 class="fw-bold">Tất cả khóa học</h3>
         </div>
     </div>
     
     @if ($courses->count() > 0)
-        <div class="row g-4">
+        <div class="row g-4 course-section">
             @foreach ($courses as $course)
                 <div class="col-lg-4 col-md-6">
-                    <div class="card border-0 shadow-sm h-100">
+                    <div class="card border-0 shadow-sm h-100 course-card hover-lift">
                         @if ($course->image_data || $course->image)
+                            <div class="zoom-image">
                             <img src="{{ $course->imageUrl }}" class="card-img-top" alt="{{ $course->title }}" style="height: 200px; object-fit: cover;">
+                            </div>
                         @else
                             <div style="background-image: url('{{ asset('images/logo-background.png') }}'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 200px; background-color: #f8f9fa; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;">
                                 <div style="background-color: #0d6efd; color: white; padding: 8px 15px; border-radius: 8px; margin-bottom: 15px; max-width: 90%; text-align: center;">
@@ -86,14 +88,14 @@
                             </div>
                         </div>
                         <div class="card-footer bg-white border-0 pt-0">
-                            <a href="{{ route('courses.show', $course) }}" class="btn btn-primary d-block">Xem chi tiết</a>
+                            <a href="{{ route('courses.show', $course) }}" class="btn btn-primary btn-animated d-block">Xem chi tiết</a>
                         </div>
                     </div>
                 </div>
             @endforeach
         </div>
     @else
-        <div class="alert alert-info text-center py-4">
+        <div class="alert alert-info text-center py-4 fade-in">
             <i class="bi bi-info-circle fs-3 mb-3"></i>
             <p class="mb-0">Không tìm thấy khóa học nào. Vui lòng thử lại với tiêu chí tìm kiếm khác.</p>
         </div>
