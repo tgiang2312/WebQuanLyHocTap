@@ -12,11 +12,11 @@
         <div class="card-header bg-white py-3">
             <div class="row">
                 <div class="col-md-6">
-                    <form action="{{ route('students.assignments') }}" method="GET" class="d-flex">
+                    <form action="{{ route('students.assignments') }}" method="GET" class="d-flex search-form">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Tìm kiếm bài tập..." name="search" value="{{ request('search') }}">
                             <button class="btn btn-primary" type="submit">
-                                <i class="bi bi-search"></i>
+                                <i class="bi bi-search me-1"></i> Tìm kiếm
                             </button>
                         </div>
                     </form>

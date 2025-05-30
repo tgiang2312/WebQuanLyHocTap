@@ -33,10 +33,10 @@
                 <div class="card-body p-4">
                     <form action="{{ route('courses.index') }}" method="GET" class="row g-3">
                         <div class="col-md-8">
-                            <div class="input-group">
+                            <div class="input-group search-form">
                                 <input type="text" class="form-control" placeholder="Tìm kiếm khóa học {{ $subcategory }}..." name="search" value="{{ request('search') }}">
                                 <button class="btn btn-primary" type="submit">
-                                    <i class="bi bi-search"></i>
+                                    <i class="bi bi-search me-1"></i> Tìm kiếm
                                 </button>
                             </div>
                         </div>

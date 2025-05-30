@@ -25,6 +25,7 @@
         <div class="col-lg-8 mx-auto">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3">Tìm kiếm khóa học</h4>
                     <x-course-search :filters="['category', 'sort']" :show-advanced="true" />
                 </div>
             </div>

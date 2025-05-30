@@ -18,10 +18,10 @@
         <div class="card-body">
             <form action="{{ route('admin.courses') }}" method="GET" class="row g-3">
                 <div class="col-md-4">
-                    <div class="input-group">
+                    <div class="input-group search-form">
                         <input type="text" class="form-control" placeholder="Tìm kiếm khóa học..." name="search" value="{{ request('search') }}">
                         <button class="btn btn-primary" type="submit">
-                            <i class="bi bi-search"></i>
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
                         </button>
                     </div>
                 </div>

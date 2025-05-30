@@ -14,6 +14,26 @@ document.addEventListener("DOMContentLoaded", () => {
   var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
   var popoverList = popoverTriggerList.map((popoverTriggerEl) => new Popover(popoverTriggerEl))
 
+  // Search form functionality
+  const searchForms = document.querySelectorAll('.search-form form');
+  searchForms.forEach(form => {
+    const searchInput = form.querySelector('input[name="search"]');
+    if (searchInput) {
+      // Auto focus on the search input when clicking on the search box
+      form.addEventListener('click', () => {
+        searchInput.focus();
+      });
+
+      // Prevent empty form submission
+      form.addEventListener('submit', (e) => {
+        if (!searchInput.value.trim()) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+    }
+  });
+
   // Add animation to elements when they come into view
   const animateOnScroll = () => {
     const elements = document.querySelectorAll(".animate-on-scroll")

@@ -1,4 +1,4 @@
-<div class="search-form">
+<div class="search-form w-100">
     <form action="{{ route('courses.search') }}" method="GET" class="row g-3">
         <div class="col-md-{{ $expandSearch ?? false ? '12' : '8' }}">
             <div class="input-group">
